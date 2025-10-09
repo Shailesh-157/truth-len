@@ -41,7 +41,7 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
         <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity" onClick={onClose}>
           <img src={logo} alt="TruthLens" className="h-10 w-10 rounded-full object-cover" />
           <span className="text-2xl font-heading font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Truth.
+            TruthLens
           </span>
         </Link>
         
