@@ -81,7 +81,7 @@ const History = () => {
   };
 
   return (
-    <div className="min-h-screen flex w-full">
+    <div className="min-h-screen flex w-full overflow-x-hidden">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       
       <div className="flex-1 lg:ml-64 w-full overflow-x-hidden">
@@ -125,22 +125,24 @@ const History = () => {
             {filteredVerifications.map((item) => (
               <Card
                 key={item.id}
-                className="border-2 hover:shadow-lg transition-all cursor-pointer w-full"
+                className="border-2 hover:shadow-lg transition-all cursor-pointer w-full max-w-full overflow-hidden"
                 onClick={() => setSelectedVerification(item)}
               >
-                <CardHeader className="p-4 sm:p-6">
-                  <div className="flex items-start gap-3 sm:gap-4 w-full">
+                <CardHeader className="p-3 sm:p-4 md:p-6 w-full">
+                  <div className="flex items-start gap-2 sm:gap-3 w-full min-w-0">
                     <div className="mt-1 flex-shrink-0">{getIcon(item.verdict)}</div>
-                    <div className="flex-1 min-w-0 overflow-hidden w-full">
-                      <CardTitle className="text-sm sm:text-base md:text-lg break-words line-clamp-2">
+                    <div className="flex-1 min-w-0 overflow-hidden w-full max-w-full">
+                      <CardTitle className="text-sm sm:text-base md:text-lg break-words overflow-wrap-anywhere pr-2">
                         {item.content_text || item.content_url || "Verification"}
                       </CardTitle>
-                      <div className="flex flex-wrap items-center gap-2 mt-2">
-                        <Badge variant={getBadgeVariant(item.verdict)} className="text-xs flex-shrink-0">
+                      <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-1.5 sm:gap-2 mt-2 w-full">
+                        <Badge variant={getBadgeVariant(item.verdict)} className="text-xs flex-shrink-0 whitespace-nowrap">
                           {item.verdict.toUpperCase()}
                         </Badge>
-                        <Badge variant="outline" className="text-xs flex-shrink-0">{item.confidence_score}% confident</Badge>
-                        <span className="text-xs sm:text-sm text-muted-foreground truncate">
+                        <Badge variant="outline" className="text-xs flex-shrink-0 whitespace-nowrap">
+                          {item.confidence_score}% confident
+                        </Badge>
+                        <span className="text-xs sm:text-sm text-muted-foreground break-words">
                           {formatDistanceToNow(new Date(item.created_at), {
                             addSuffix: true,
                           })}
