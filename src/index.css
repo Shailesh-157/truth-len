@@ -89,7 +89,7 @@ All colors MUST be HSL.
     left: 0;
     right: 0;
     bottom: 0;
-    z-index: -1;
+    z-index: -2;
     background: 
       radial-gradient(circle at 20% 50%, hsl(217 91% 60% / 0.15) 0%, transparent 50%),
       radial-gradient(circle at 80% 80%, hsl(186 100% 60% / 0.15) 0%, transparent 50%),
@@ -97,11 +97,32 @@ All colors MUST be HSL.
     animation: gradient-shift 15s ease infinite;
   }
   
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -1;
+    background-image: 
+      repeating-linear-gradient(45deg, transparent, transparent 35px, hsl(217 91% 60% / 0.03) 35px, hsl(217 91% 60% / 0.03) 70px),
+      repeating-linear-gradient(-45deg, transparent, transparent 35px, hsl(186 100% 60% / 0.03) 35px, hsl(186 100% 60% / 0.03) 70px);
+    opacity: 0.5;
+  }
+  
   .dark body::before {
     background: 
       radial-gradient(circle at 20% 50%, hsl(186 100% 60% / 0.08) 0%, transparent 50%),
       radial-gradient(circle at 80% 80%, hsl(271 91% 65% / 0.08) 0%, transparent 50%),
       radial-gradient(circle at 40% 20%, hsl(217 91% 60% / 0.06) 0%, transparent 50%);
+  }
+  
+  .dark body::after {
+    background-image: 
+      repeating-linear-gradient(45deg, transparent, transparent 35px, hsl(186 100% 60% / 0.04) 35px, hsl(186 100% 60% / 0.04) 70px),
+      repeating-linear-gradient(-45deg, transparent, transparent 35px, hsl(271 91% 65% / 0.04) 35px, hsl(271 91% 65% / 0.04) 70px);
+    opacity: 0.6;
   }
   
   h1, h2, h3, h4, h5, h6 {
