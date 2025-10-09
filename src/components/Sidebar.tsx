@@ -1,42 +1,39 @@
 import { Home, Search, History, TrendingUp, Settings, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Link, useLocation } from "react-router-dom";
 import logo from "@/assets/truthlens-logo.png";
 
-interface SidebarProps {
-  activeTab: string;
-  onTabChange: (tab: string) => void;
-}
-
 const menuItems = [
-  { id: "dashboard", icon: Home, label: "Dashboard" },
-  { id: "verify", icon: Search, label: "Verify Now" },
-  { id: "history", icon: History, label: "History" },
-  { id: "trending", icon: TrendingUp, label: "Trending" },
-  { id: "about", icon: Info, label: "About" },
-  { id: "settings", icon: Settings, label: "Settings" },
+  { id: "dashboard", icon: Home, label: "Dashboard", path: "/" },
+  { id: "history", icon: History, label: "History", path: "/history" },
+  { id: "trending", icon: TrendingUp, label: "Trending", path: "/" },
+  { id: "about", icon: Info, label: "About", path: "/about" },
+  { id: "settings", icon: Settings, label: "Settings", path: "/settings" },
 ];
 
-export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
+export function Sidebar() {
+  const location = useLocation();
+
   return (
     <aside className="fixed left-0 top-0 h-screen w-64 bg-card border-r border-border p-6 flex flex-col">
       {/* Logo Section */}
-      <div className="flex items-center gap-3 mb-12">
+      <Link to="/" className="flex items-center gap-3 mb-12 hover:opacity-80 transition-opacity">
         <img src={logo} alt="TruthLens" className="h-10 w-10 rounded-full object-cover" />
         <span className="text-2xl font-heading font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
           Truth.
         </span>
-      </div>
+      </Link>
 
       {/* Navigation */}
       <nav className="flex-1 space-y-2">
         {menuItems.map((item) => {
           const Icon = item.icon;
-          const isActive = activeTab === item.id;
+          const isActive = location.pathname === item.path;
           
           return (
-            <button
+            <Link
               key={item.id}
-              onClick={() => onTabChange(item.id)}
+              to={item.path}
               className={cn(
                 "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all",
                 isActive 
@@ -46,7 +43,7 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
             >
               <Icon className="h-5 w-5" />
               <span>{item.label}</span>
-            </button>
+            </Link>
           );
         })}
       </nav>

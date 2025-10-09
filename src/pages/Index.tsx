@@ -11,7 +11,6 @@ import { Shield, CheckCircle, XCircle, TrendingUp } from "lucide-react";
 
 const Index = () => {
   const { user, loading } = useAuth();
-  const [activeTab, setActiveTab] = useState("dashboard");
   const [refreshKey, setRefreshKey] = useState(0);
   const [showAuth, setShowAuth] = useState(false);
 
@@ -35,7 +34,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex w-full">
-      <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
+      <Sidebar />
       
       <div className="flex-1 ml-64">
         <DashboardHeader onSignInClick={() => setShowAuth(true)} />

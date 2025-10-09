@@ -4,18 +4,24 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle, XCircle, AlertCircle, HelpCircle, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDistanceToNow } from "date-fns";
+import { VerificationDialog } from "@/components/VerificationDialog";
 
 interface Verification {
   id: string;
   content_text: string | null;
+  content_url: string | null;
   verdict: "true" | "false" | "misleading" | "unverified";
   confidence_score: number;
+  explanation: string | null;
+  sources: any;
+  ai_analysis: any;
   created_at: string;
 }
 
 export function RecentVerifications() {
   const [verifications, setVerifications] = useState<Verification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedVerification, setSelectedVerification] = useState<Verification | null>(null);
 
   useEffect(() => {
     loadVerifications();
@@ -73,7 +79,11 @@ export function RecentVerifications() {
           </p>
         ) : (
           verifications.map((item) => (
-            <div key={item.id} className="flex items-start gap-3 pb-4 border-b last:border-0">
+            <div
+              key={item.id}
+              className="flex items-start gap-3 pb-4 border-b last:border-0 cursor-pointer hover:bg-secondary/50 p-2 rounded transition-colors"
+              onClick={() => setSelectedVerification(item)}
+            >
               <div className="mt-1">{getIcon(item.verdict)}</div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">
@@ -92,6 +102,12 @@ export function RecentVerifications() {
           ))
         )}
       </CardContent>
+
+      <VerificationDialog
+        open={!!selectedVerification}
+        onOpenChange={(open) => !open && setSelectedVerification(null)}
+        verification={selectedVerification}
+      />
     </Card>
   );
 }
