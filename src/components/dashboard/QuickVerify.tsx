@@ -1,11 +1,18 @@
-import { useState, useRef } from "react";
+import { useState, useRef, DragEvent } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Search, Link2, Image, Loader2, X } from "lucide-react";
+import { Search, Link2, Image, Loader2, X, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface QuickVerifyProps {
   onVerificationComplete?: () => void;
@@ -19,24 +26,57 @@ export function QuickVerify({ onVerificationComplete, onAuthRequired }: QuickVer
   const [inputType, setInputType] = useState<"text" | "url" | "image">("text");
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [showImageDialog, setShowImageDialog] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const processImage = (file: File) => {
+    if (file.size > 10 * 1024 * 1024) { // 10MB limit
+      toast.error("Image size should be less than 10MB");
+      return;
+    }
+    
+    if (!file.type.startsWith('image/')) {
+      toast.error("Please select a valid image file");
+      return;
+    }
+    
+    setSelectedImage(file);
+    setInputType("image");
+    
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+    setShowImageDialog(false);
+  };
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 10 * 1024 * 1024) { // 10MB limit
-        toast.error("Image size should be less than 10MB");
-        return;
-      }
-      setSelectedImage(file);
-      setInputType("image");
-      
-      // Create preview
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      processImage(file);
+    }
+  };
+
+  const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+    
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      processImage(file);
     }
   };
 
@@ -207,7 +247,7 @@ export function QuickVerify({ onVerificationComplete, onAuthRequired }: QuickVer
             variant="outline" 
             size="icon" 
             disabled={isVerifying}
-            onClick={() => fileInputRef.current?.click()}
+            onClick={() => setShowImageDialog(true)}
             className="flex-shrink-0"
             title="Upload image"
           >
@@ -228,6 +268,46 @@ export function QuickVerify({ onVerificationComplete, onAuthRequired }: QuickVer
           </p>
         </div>
       </CardContent>
+
+      {/* Image Upload Dialog */}
+      <Dialog open={showImageDialog} onOpenChange={setShowImageDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Upload Image</DialogTitle>
+            <DialogDescription>
+              Upload an image to verify its authenticity and detect potential misinformation
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div
+            className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+              isDragging 
+                ? 'border-primary bg-primary/5' 
+                : 'border-border hover:border-primary/50'
+            }`}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+          >
+            <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+            <p className="text-sm font-medium mb-2">
+              Drag and drop your image here
+            </p>
+            <p className="text-xs text-muted-foreground mb-4">
+              or
+            </p>
+            <Button
+              variant="outline"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              Browse from device
+            </Button>
+            <p className="text-xs text-muted-foreground mt-4">
+              Supports: JPG, PNG, WEBP (Max 10MB)
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
