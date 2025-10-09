@@ -150,6 +150,11 @@ Based on these metadata, provide a preliminary assessment of authenticity concer
 
     const analysis = JSON.parse(toolCall.function.arguments);
 
+    // Convert confidence to integer (0-100) if it's a decimal (0-1)
+    const confidenceScore = analysis.confidence < 1 
+      ? Math.round(analysis.confidence * 100) 
+      : Math.round(analysis.confidence);
+
     // Store verification result
     const { data: verification, error: dbError } = await supabase
       .from('verifications')
@@ -158,7 +163,7 @@ Based on these metadata, provide a preliminary assessment of authenticity concer
         content_type: 'video',
         video_url: videoPath,
         verdict: analysis.verdict,
-        confidence_score: analysis.confidence,
+        confidence_score: confidenceScore,
         explanation: analysis.explanation,
         ai_analysis: {
           deepfakeIndicators: analysis.deepfakeIndicators || [],
