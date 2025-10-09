@@ -4,6 +4,8 @@ import { Input } from "./ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "./ui/button";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,8 +20,27 @@ interface DashboardHeaderProps {
 
 export function DashboardHeader({ onSignInClick, onMenuClick }: DashboardHeaderProps) {
   const { user, signOut } = useAuth();
+  const [displayName, setDisplayName] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (user) {
+      supabase
+        .from('profiles')
+        .select('display_name')
+        .eq('user_id', user.id)
+        .single()
+        .then(({ data }) => {
+          if (data?.display_name) {
+            setDisplayName(data.display_name);
+          }
+        });
+    }
+  }, [user]);
   
-  const getInitials = (email: string | undefined) => {
+  const getInitials = (name: string | null, email: string | undefined) => {
+    if (name) {
+      return name.substring(0, 2).toUpperCase();
+    }
     if (!email) return "TS";
     return email.substring(0, 2).toUpperCase();
   };
@@ -61,13 +82,13 @@ export function DashboardHeader({ onSignInClick, onMenuClick }: DashboardHeaderP
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="gap-2 md:gap-3 p-1 md:p-2">
                   <div className="text-right hidden sm:block">
-                    <p className="text-sm font-semibold">Truth Seeker</p>
+                    <p className="text-sm font-semibold">{displayName || 'Truth Seeker'}</p>
                     <p className="text-xs text-muted-foreground truncate max-w-[120px] md:max-w-[180px]">{user?.email}</p>
                   </div>
                   <Avatar className="h-8 w-8 md:h-10 md:w-10">
                     <AvatarImage src="" />
                     <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-white text-xs md:text-sm">
-                      {getInitials(user?.email)}
+                      {getInitials(displayName, user?.email)}
                     </AvatarFallback>
                   </Avatar>
                 </Button>
