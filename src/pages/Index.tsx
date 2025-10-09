@@ -13,6 +13,7 @@ const Index = () => {
   const { user, loading } = useAuth();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [refreshKey, setRefreshKey] = useState(0);
+  const [showAuth, setShowAuth] = useState(false);
 
   if (loading) {
     return (
@@ -25,8 +26,11 @@ const Index = () => {
     );
   }
 
-  if (!user) {
-    return <Auth onSuccess={() => setRefreshKey((k) => k + 1)} />;
+  if (showAuth && !user) {
+    return <Auth onSuccess={() => {
+      setShowAuth(false);
+      setRefreshKey((k) => k + 1);
+    }} />;
   }
 
   return (
@@ -34,7 +38,7 @@ const Index = () => {
       <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
       
       <div className="flex-1 ml-64">
-        <DashboardHeader />
+        <DashboardHeader onSignInClick={() => setShowAuth(true)} />
         
         <main className="p-8 space-y-6">
           {/* Stats Overview */}
@@ -73,7 +77,10 @@ const Index = () => {
           <div className="grid lg:grid-cols-3 gap-6">
             {/* Left Column - 2 cols */}
             <div className="lg:col-span-2 space-y-6">
-              <QuickVerify onVerificationComplete={() => setRefreshKey((k) => k + 1)} />
+              <QuickVerify 
+                onVerificationComplete={() => setRefreshKey((k) => k + 1)}
+                onAuthRequired={() => setShowAuth(true)}
+              />
               <RecentVerifications key={refreshKey} />
             </div>
 

@@ -4,17 +4,31 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Search, Link2, Image, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 
 interface QuickVerifyProps {
   onVerificationComplete?: () => void;
+  onAuthRequired?: () => void;
 }
 
-export function QuickVerify({ onVerificationComplete }: QuickVerifyProps) {
+export function QuickVerify({ onVerificationComplete, onAuthRequired }: QuickVerifyProps) {
+  const { user } = useAuth();
   const [content, setContent] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
 
   const handleVerify = async () => {
+    if (!user) {
+      toast.error("Sign in required", {
+        description: "Please sign in to verify content and save your verification history.",
+        action: {
+          label: "Sign In",
+          onClick: () => onAuthRequired?.(),
+        },
+      });
+      return;
+    }
+
     if (!content.trim()) {
       toast.error("Please enter some content to verify");
       return;
@@ -102,7 +116,10 @@ export function QuickVerify({ onVerificationComplete }: QuickVerifyProps) {
         
         <div className="pt-2 border-t border-border">
           <p className="text-xs text-muted-foreground text-center">
-            Supports text, URLs, images, and videos
+            {user 
+              ? "Supports text, URLs, images, and videos" 
+              : "Sign in to verify content and track your verification history"
+            }
           </p>
         </div>
       </CardContent>

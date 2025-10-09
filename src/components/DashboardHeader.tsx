@@ -1,4 +1,4 @@
-import { Bell, Search, LogOut } from "lucide-react";
+import { Bell, Search, LogOut, LogIn } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { Input } from "./ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -11,7 +11,11 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 
-export function DashboardHeader() {
+interface DashboardHeaderProps {
+  onSignInClick?: () => void;
+}
+
+export function DashboardHeader({ onSignInClick }: DashboardHeaderProps) {
   const { user, signOut } = useAuth();
   
   const getInitials = (email: string | undefined) => {
@@ -36,34 +40,46 @@ export function DashboardHeader() {
       <div className="flex items-center gap-4">
         <ThemeToggle />
         
-        <button className="relative p-2 hover:bg-secondary rounded-full transition-colors">
-          <Bell className="h-5 w-5 text-muted-foreground" />
-          <span className="absolute top-1 right-1 h-2 w-2 bg-destructive rounded-full" />
-        </button>
+        {user && (
+          <button className="relative p-2 hover:bg-secondary rounded-full transition-colors">
+            <Bell className="h-5 w-5 text-muted-foreground" />
+            <span className="absolute top-1 right-1 h-2 w-2 bg-destructive rounded-full" />
+          </button>
+        )}
 
         <div className="flex items-center gap-3 pl-4 border-l border-border">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="gap-3 p-2">
-                <div className="text-right">
-                  <p className="text-sm font-semibold">Truth Seeker</p>
-                  <p className="text-xs text-muted-foreground">{user?.email}</p>
-                </div>
-                <Avatar>
-                  <AvatarImage src="" />
-                  <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-white">
-                    {getInitials(user?.email)}
-                  </AvatarFallback>
-                </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={signOut}>
-                <LogOut className="h-4 w-4 mr-2" />
-                Sign Out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="gap-3 p-2">
+                  <div className="text-right">
+                    <p className="text-sm font-semibold">Truth Seeker</p>
+                    <p className="text-xs text-muted-foreground">{user?.email}</p>
+                  </div>
+                  <Avatar>
+                    <AvatarImage src="" />
+                    <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-white">
+                      {getInitials(user?.email)}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={signOut}>
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button 
+              onClick={onSignInClick}
+              className="bg-gradient-to-r from-primary to-accent hover:opacity-90"
+            >
+              <LogIn className="h-4 w-4 mr-2" />
+              Sign In
+            </Button>
+          )}
         </div>
       </div>
     </header>
