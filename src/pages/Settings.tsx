@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -6,18 +7,27 @@ import { useAuth } from "@/hooks/useAuth";
 import { Settings as SettingsIcon, Bell, Shield, Palette } from "lucide-react";
 import { useTheme } from "next-themes";
 import { toast } from "sonner";
+import { Sidebar } from "@/components/Sidebar";
+import { DashboardHeader } from "@/components/DashboardHeader";
 
 const Settings = () => {
   const { user } = useAuth();
   const { theme, setTheme } = useTheme();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleSaveSettings = () => {
     toast.success("Settings saved successfully!");
   };
 
   return (
-    <div className="min-h-screen p-8 ml-64">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="min-h-screen flex w-full">
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      
+      <div className="flex-1 lg:ml-64">
+        <DashboardHeader onMenuClick={() => setSidebarOpen(true)} />
+        
+        <div className="p-4 lg:p-8">
+          <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
         <div>
           <h1 className="text-4xl font-bold mb-2">Settings</h1>
@@ -154,6 +164,8 @@ const Settings = () => {
           >
             Save Settings
           </Button>
+          </div>
+          </div>
         </div>
       </div>
     </div>

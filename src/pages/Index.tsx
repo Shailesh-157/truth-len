@@ -13,6 +13,7 @@ const Index = () => {
   const { user, loading } = useAuth();
   const [refreshKey, setRefreshKey] = useState(0);
   const [showAuth, setShowAuth] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   if (loading) {
     return (
@@ -34,10 +35,13 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex w-full">
-      <Sidebar />
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       
-      <div className="flex-1 ml-64">
-        <DashboardHeader onSignInClick={() => setShowAuth(true)} />
+      <div className="flex-1 lg:ml-64">
+        <DashboardHeader 
+          onSignInClick={() => setShowAuth(true)}
+          onMenuClick={() => setSidebarOpen(true)}
+        />
         
         <main className="p-8 space-y-6">
           {/* Stats Overview */}

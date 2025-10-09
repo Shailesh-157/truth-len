@@ -1,4 +1,4 @@
-import { Bell, Search, LogOut, LogIn } from "lucide-react";
+import { Bell, Search, LogOut, LogIn, Menu } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { Input } from "./ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -13,9 +13,10 @@ import {
 
 interface DashboardHeaderProps {
   onSignInClick?: () => void;
+  onMenuClick?: () => void;
 }
 
-export function DashboardHeader({ onSignInClick }: DashboardHeaderProps) {
+export function DashboardHeader({ onSignInClick, onMenuClick }: DashboardHeaderProps) {
   const { user, signOut } = useAuth();
   
   const getInitials = (email: string | undefined) => {
@@ -24,10 +25,17 @@ export function DashboardHeader({ onSignInClick }: DashboardHeaderProps) {
   };
 
   return (
-    <header className="h-20 border-b border-border bg-background/80 backdrop-blur-md flex items-center justify-between px-8">
+    <header className="h-20 border-b border-border bg-background/80 backdrop-blur-md flex items-center justify-between px-4 lg:px-8">
+      {/* Mobile Menu Button */}
+      <button
+        onClick={onMenuClick}
+        className="lg:hidden p-2 hover:bg-secondary rounded-lg transition-colors"
+      >
+        <Menu className="h-6 w-6" />
+      </button>
       {/* Search Bar */}
-      <div className="flex-1 max-w-xl">
-        <div className="relative">
+      <div className="flex-1 max-w-xl mx-4">
+        <div className="relative hidden md:block">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search news to verify..."

@@ -1,11 +1,22 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye, Shield, Users, Zap, Globe, Award } from "lucide-react";
+import { Sidebar } from "@/components/Sidebar";
+import { DashboardHeader } from "@/components/DashboardHeader";
 import logo from "@/assets/truthlens-logo.png";
 
 const About = () => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  
   return (
-    <div className="min-h-screen ml-64">
-      <div className="max-w-4xl mx-auto p-8 space-y-8">
+    <div className="min-h-screen flex w-full">
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      
+      <div className="flex-1 lg:ml-64">
+        <DashboardHeader onMenuClick={() => setSidebarOpen(true)} />
+        
+        <div className="p-4 lg:p-8">
+          <div className="max-w-4xl mx-auto space-y-8">
         {/* Header */}
         <div className="text-center space-y-4">
           <img
@@ -159,6 +170,8 @@ const About = () => {
             </p>
           </CardContent>
         </Card>
+        </div>
+        </div>
       </div>
     </div>
   );

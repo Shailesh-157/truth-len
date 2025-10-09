@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -6,6 +6,8 @@ import { CheckCircle, XCircle, AlertCircle, HelpCircle, Search, Loader2 } from "
 import { supabase } from "@/integrations/supabase/client";
 import { formatDistanceToNow } from "date-fns";
 import { VerificationDialog } from "@/components/VerificationDialog";
+import { Sidebar } from "@/components/Sidebar";
+import { DashboardHeader } from "@/components/DashboardHeader";
 
 interface Verification {
   id: string;
@@ -25,6 +27,7 @@ const History = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedVerification, setSelectedVerification] = useState<Verification | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     loadVerifications();
@@ -78,8 +81,14 @@ const History = () => {
   };
 
   return (
-    <div className="min-h-screen p-8 ml-64">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="min-h-screen flex w-full">
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      
+      <div className="flex-1 lg:ml-64">
+        <DashboardHeader onMenuClick={() => setSidebarOpen(true)} />
+        
+        <div className="p-4 lg:p-8">
+          <div className="max-w-6xl mx-auto space-y-6">
         <div>
           <h1 className="text-4xl font-bold mb-2">Verification History</h1>
           <p className="text-muted-foreground">
@@ -145,13 +154,15 @@ const History = () => {
             ))}
           </div>
         )}
-      </div>
+          </div>
+        </div>
 
-      <VerificationDialog
-        open={!!selectedVerification}
-        onOpenChange={(open) => !open && setSelectedVerification(null)}
-        verification={selectedVerification}
-      />
+        <VerificationDialog
+          open={!!selectedVerification}
+          onOpenChange={(open) => !open && setSelectedVerification(null)}
+          verification={selectedVerification}
+        />
+      </div>
     </div>
   );
 };
