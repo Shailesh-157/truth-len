@@ -70,10 +70,22 @@ export function DashboardHeader({ onSignInClick, onMenuClick }: DashboardHeaderP
         <ThemeToggle />
         
         {user && (
-          <button className="relative p-2 hover:bg-secondary rounded-full transition-colors hidden sm:block">
-            <Bell className="h-5 w-5 text-muted-foreground" />
-            <span className="absolute top-1 right-1 h-2 w-2 bg-destructive rounded-full" />
-          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="relative p-2 hover:bg-secondary rounded-full transition-colors hidden sm:block">
+                <Bell className="h-5 w-5 text-muted-foreground" />
+                <span className="absolute top-1 right-1 h-2 w-2 bg-destructive rounded-full" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-80">
+              <div className="px-4 py-3 border-b border-border">
+                <h3 className="font-semibold text-sm">Notifications</h3>
+              </div>
+              <div className="p-4 text-center text-sm text-muted-foreground">
+                No new notifications
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
 
         <div className="flex items-center gap-2 md:gap-3 pl-2 md:pl-4 border-l border-border">
