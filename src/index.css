@@ -86,7 +86,8 @@ All colors MUST be HSL.
   }
   
   body.dark {
-    background-image: none;
+    background-image: none !important;
+    background: hsl(var(--background)) !important;
   }
   
   h1, h2, h3, h4, h5, h6 {
