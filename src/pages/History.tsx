@@ -84,26 +84,26 @@ const History = () => {
     <div className="min-h-screen flex w-full">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       
-      <div className="flex-1 lg:ml-64">
+      <div className="flex-1 lg:ml-64 w-full overflow-x-hidden">
         <DashboardHeader onMenuClick={() => setSidebarOpen(true)} />
         
-        <div className="p-4 lg:p-8">
-          <div className="max-w-6xl mx-auto space-y-6">
-        <div>
-          <h1 className="text-4xl font-bold mb-2">Verification History</h1>
-          <p className="text-muted-foreground">
+        <div className="p-4 md:p-6 lg:p-8 w-full max-w-full">
+          <div className="max-w-6xl mx-auto space-y-4 md:space-y-6 w-full">
+        <div className="w-full">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">Verification History</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
             Browse all your past verifications and their results
           </p>
         </div>
 
         {/* Search */}
-        <div className="relative max-w-md">
+        <div className="relative max-w-md w-full">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search verifications..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
+            className="pl-10 w-full"
           />
         </div>
 
@@ -113,35 +113,34 @@ const History = () => {
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
         ) : filteredVerifications.length === 0 ? (
-          <Card>
+          <Card className="w-full">
             <CardContent className="py-12 text-center">
-              <p className="text-muted-foreground">
+              <p className="text-sm sm:text-base text-muted-foreground">
                 {searchQuery ? "No verifications found" : "No verification history yet"}
               </p>
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-4">
+          <div className="grid gap-3 sm:gap-4 w-full">
             {filteredVerifications.map((item) => (
               <Card
                 key={item.id}
-                className="border-2 hover:shadow-lg transition-all cursor-pointer"
+                className="border-2 hover:shadow-lg transition-all cursor-pointer w-full"
                 onClick={() => setSelectedVerification(item)}
               >
-                <CardHeader>
-                  <div className="flex items-start gap-4">
-                    <div className="mt-1">{getIcon(item.verdict)}</div>
-                    <div className="flex-1 min-w-0">
-                      <CardTitle className="text-lg truncate">
-                        {item.content_text?.substring(0, 100) || "Verification"}
-                        {item.content_text && item.content_text.length > 100 && "..."}
+                <CardHeader className="p-4 sm:p-6">
+                  <div className="flex items-start gap-3 sm:gap-4 w-full">
+                    <div className="mt-1 flex-shrink-0">{getIcon(item.verdict)}</div>
+                    <div className="flex-1 min-w-0 overflow-hidden w-full">
+                      <CardTitle className="text-sm sm:text-base md:text-lg break-words line-clamp-2">
+                        {item.content_text || item.content_url || "Verification"}
                       </CardTitle>
-                      <div className="flex items-center gap-2 mt-2">
-                        <Badge variant={getBadgeVariant(item.verdict)}>
+                      <div className="flex flex-wrap items-center gap-2 mt-2">
+                        <Badge variant={getBadgeVariant(item.verdict)} className="text-xs flex-shrink-0">
                           {item.verdict.toUpperCase()}
                         </Badge>
-                        <Badge variant="outline">{item.confidence_score}% confident</Badge>
-                        <span className="text-sm text-muted-foreground">
+                        <Badge variant="outline" className="text-xs flex-shrink-0">{item.confidence_score}% confident</Badge>
+                        <span className="text-xs sm:text-sm text-muted-foreground truncate">
                           {formatDistanceToNow(new Date(item.created_at), {
                             addSuffix: true,
                           })}
