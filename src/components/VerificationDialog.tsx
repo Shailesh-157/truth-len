@@ -185,7 +185,10 @@ export function VerificationDialog({
             <Button 
               variant="outline" 
               className="w-full"
-              onClick={() => setFeedbackOpen(true)}
+              onClick={() => {
+                setFeedbackOpen(true);
+                onOpenChange(false);
+              }}
             >
               <MessageSquare className="h-4 w-4 mr-2" />
               Report Accuracy Issue
