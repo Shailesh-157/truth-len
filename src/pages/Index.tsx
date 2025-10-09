@@ -8,10 +8,12 @@ import { RecentVerifications } from "@/components/dashboard/RecentVerifications"
 import { TrendingNews } from "@/components/dashboard/TrendingNews";
 import { Auth } from "@/components/Auth";
 import { useAuth } from "@/hooks/useAuth";
+import { useStats } from "@/hooks/useStats";
 import { Shield, CheckCircle, XCircle, TrendingUp } from "lucide-react";
 
 const Index = () => {
   const { user, loading } = useAuth();
+  const { stats, loading: statsLoading } = useStats();
   const [refreshKey, setRefreshKey] = useState(0);
   const [showAuth, setShowAuth] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -49,29 +51,29 @@ const Index = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 w-full">
             <StatsCard
               title="Total Verifications"
-              value="12,543"
-              trend="+12% from last week"
+              value={statsLoading ? "..." : stats.totalVerifications.toLocaleString()}
+              trend={stats.totalVerifications > 0 ? "Live data" : "No verifications yet"}
               icon={Shield}
               iconColor="from-blue-500 to-blue-600"
             />
             <StatsCard
               title="Verified True"
-              value="8,234"
-              trend="65.6% accuracy rate"
+              value={statsLoading ? "..." : stats.verifiedTrue.toLocaleString()}
+              trend={stats.totalVerifications > 0 ? `${stats.accuracyRate}% accuracy rate` : "No data"}
               icon={CheckCircle}
               iconColor="from-green-500 to-green-600"
             />
             <StatsCard
               title="Detected Fake"
-              value="3,127"
-              trend="24.9% of total"
+              value={statsLoading ? "..." : stats.detectedFake.toLocaleString()}
+              trend={stats.totalVerifications > 0 ? `${stats.fakePercentage}% of total` : "No data"}
               icon={XCircle}
               iconColor="from-red-500 to-red-600"
             />
             <StatsCard
               title="Trending Topics"
-              value="42"
-              trend="8 new today"
+              value={statsLoading ? "..." : stats.trendingTopics}
+              trend="Updated in real-time"
               icon={TrendingUp}
               iconColor="from-purple-500 to-purple-600"
             />
