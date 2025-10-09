@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -6,8 +7,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, XCircle, AlertCircle, HelpCircle, Shield } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { CheckCircle, XCircle, AlertCircle, HelpCircle, Shield, MessageSquare } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { FeedbackDialog } from "@/components/FeedbackDialog";
 
 interface VerificationDialogProps {
   open: boolean;
@@ -30,6 +33,8 @@ export function VerificationDialog({
   onOpenChange,
   verification,
 }: VerificationDialogProps) {
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  
   if (!verification) return null;
 
   const getIcon = (verdict: string) => {
@@ -174,8 +179,29 @@ export function VerificationDialog({
               </ul>
             </div>
           )}
+
+          {/* Report Button */}
+          <div className="pt-6 border-t">
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={() => {
+                setFeedbackOpen(true);
+                onOpenChange(false);
+              }}
+            >
+              <MessageSquare className="h-4 w-4 mr-2" />
+              Report Accuracy Issue
+            </Button>
+          </div>
         </div>
       </DialogContent>
+
+      <FeedbackDialog 
+        open={feedbackOpen} 
+        onOpenChange={setFeedbackOpen}
+        verificationId={verification.id}
+      />
     </Dialog>
   );
 }
