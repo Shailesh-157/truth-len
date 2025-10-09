@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Search, Link2, Image, Loader2 } from "lucide-react";
+import { Search, Link2, Image, Loader2, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -16,6 +16,38 @@ export function QuickVerify({ onVerificationComplete, onAuthRequired }: QuickVer
   const { user } = useAuth();
   const [content, setContent] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
+  const [inputType, setInputType] = useState<"text" | "url" | "image">("text");
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+        toast.error("Image size should be less than 10MB");
+        return;
+      }
+      setSelectedImage(file);
+      setInputType("image");
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const clearImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+    setInputType("text");
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
 
   const handleVerify = async () => {
     if (!user) {
@@ -29,19 +61,40 @@ export function QuickVerify({ onVerificationComplete, onAuthRequired }: QuickVer
       return;
     }
 
-    if (!content.trim()) {
-      toast.error("Please enter some content to verify");
+    if (!content.trim() && !selectedImage) {
+      toast.error("Please enter some content or select an image to verify");
       return;
     }
 
     setIsVerifying(true);
 
     try {
+      let requestBody: any = {
+        contentType: inputType === "url" ? "url" : "text",
+      };
+
+      if (selectedImage) {
+        // Convert image to base64
+        const reader = new FileReader();
+        const base64Promise = new Promise((resolve) => {
+          reader.onloadend = () => resolve(reader.result);
+          reader.readAsDataURL(selectedImage);
+        });
+        const base64Image = await base64Promise;
+        
+        requestBody = {
+          contentType: "image",
+          imageData: base64Image,
+          contentText: content || "Analyze this image for authenticity and credibility",
+        };
+      } else if (inputType === "url") {
+        requestBody.contentUrl = content;
+      } else {
+        requestBody.contentText = content;
+      }
+
       const { data, error } = await supabase.functions.invoke("verify-content", {
-        body: {
-          contentText: content,
-          contentType: "text",
-        },
+        body: requestBody,
       });
 
       if (error) throw error;
@@ -62,6 +115,7 @@ export function QuickVerify({ onVerificationComplete, onAuthRequired }: QuickVer
       });
 
       setContent("");
+      clearImage();
       onVerificationComplete?.();
     } catch (error: any) {
       console.error("Verification error:", error);
@@ -80,19 +134,49 @@ export function QuickVerify({ onVerificationComplete, onAuthRequired }: QuickVer
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 w-full">
-        <Textarea
-          placeholder="Paste news text, URL, or claim to verify..."
-          className="min-h-[100px] sm:min-h-[120px] resize-none w-full"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          disabled={isVerifying}
+        {imagePreview ? (
+          <div className="relative">
+            <img 
+              src={imagePreview} 
+              alt="Selected" 
+              className="w-full h-48 object-cover rounded-lg"
+            />
+            <Button
+              variant="destructive"
+              size="icon"
+              className="absolute top-2 right-2"
+              onClick={clearImage}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        ) : (
+          <Textarea
+            placeholder={
+              inputType === "url" 
+                ? "Paste URL to verify..." 
+                : "Paste news text or claim to verify..."
+            }
+            className="min-h-[100px] sm:min-h-[120px] resize-none w-full"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            disabled={isVerifying}
+          />
+        )}
+        
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleImageSelect}
+          className="hidden"
         />
         
         <div className="flex gap-2 w-full">
           <Button
             className="flex-1 bg-gradient-to-r from-primary to-accent hover:opacity-90 text-sm sm:text-base min-w-0"
             onClick={handleVerify}
-            disabled={isVerifying || !content.trim()}
+            disabled={isVerifying || (!content.trim() && !selectedImage)}
           >
             {isVerifying ? (
               <>
@@ -106,10 +190,27 @@ export function QuickVerify({ onVerificationComplete, onAuthRequired }: QuickVer
               </>
             )}
           </Button>
-          <Button variant="outline" size="icon" disabled={isVerifying} className="flex-shrink-0">
+          <Button 
+            variant={inputType === "url" ? "default" : "outline"} 
+            size="icon" 
+            disabled={isVerifying || !!selectedImage}
+            onClick={() => {
+              setInputType(inputType === "url" ? "text" : "url");
+              setContent("");
+            }}
+            className="flex-shrink-0"
+            title="Toggle URL mode"
+          >
             <Link2 className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="icon" disabled={isVerifying} className="flex-shrink-0">
+          <Button 
+            variant="outline" 
+            size="icon" 
+            disabled={isVerifying}
+            onClick={() => fileInputRef.current?.click()}
+            className="flex-shrink-0"
+            title="Upload image"
+          >
             <Image className="h-4 w-4" />
           </Button>
         </div>
@@ -117,7 +218,11 @@ export function QuickVerify({ onVerificationComplete, onAuthRequired }: QuickVer
         <div className="pt-2 border-t border-border w-full">
           <p className="text-xs text-muted-foreground text-center break-words">
             {user 
-              ? "Supports text, URLs, images, and videos" 
+              ? selectedImage
+                ? "Image selected - Click 'Verify Now' to analyze"
+                : inputType === "url"
+                ? "Paste a URL and click verify"
+                : "Supports text, URLs, and images"
               : "Sign in to verify content and track your verification history"
             }
           </p>

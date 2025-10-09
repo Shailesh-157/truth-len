@@ -12,11 +12,11 @@ serve(async (req) => {
   }
 
   try {
-    const { contentText, contentUrl, contentType } = await req.json();
+    const { contentText, contentUrl, contentType, imageData } = await req.json();
     
-    if (!contentText && !contentUrl) {
+    if (!contentText && !contentUrl && !imageData) {
       return new Response(
-        JSON.stringify({ error: "Content text or URL is required" }),
+        JSON.stringify({ error: "Content text, URL, or image is required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -26,10 +26,34 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    // Prepare the content for AI analysis
-    const analysisPrompt = contentUrl 
-      ? `Analyze this news URL for credibility: ${contentUrl}\n\nContent: ${contentText || 'No additional text provided'}`
-      : `Analyze this news claim for credibility: ${contentText}`;
+    // Prepare the message content for AI analysis
+    let messageContent: any[];
+    
+    if (imageData) {
+      // For image analysis
+      messageContent = [
+        {
+          type: "text",
+          text: contentText || "Analyze this image for authenticity, credibility, and potential misinformation. Is this image real or fake/manipulated?"
+        },
+        {
+          type: "image_url",
+          image_url: {
+            url: imageData
+          }
+        }
+      ];
+    } else {
+      // For text/URL analysis
+      const analysisPrompt = contentUrl 
+        ? `Analyze this news URL for credibility: ${contentUrl}\n\nContent: ${contentText || 'No additional text provided'}`
+        : `Analyze this news claim for credibility: ${contentText}`;
+      
+      messageContent = [{
+        type: "text",
+        text: analysisPrompt
+      }];
+    }
 
     // Call Lovable AI for analysis
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -43,7 +67,10 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `You are a fact-checking AI assistant. Analyze news content and claims for truthfulness. 
+            content: `You are a fact-checking AI assistant. Analyze news content, claims, and images for truthfulness. 
+            
+            For images, check for signs of manipulation, assess authenticity, and identify if the image is being used out of context.
+            
             Provide:
             1. A verdict: "true", "false", "misleading", or "unverified"
             2. A confidence score (0-100)
@@ -62,7 +89,7 @@ serve(async (req) => {
           },
           {
             role: "user",
-            content: analysisPrompt
+            content: messageContent
           }
         ],
         tools: [
