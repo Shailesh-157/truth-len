@@ -11,7 +11,6 @@ interface SidebarProps {
 const menuItems = [
   { id: "dashboard", icon: Home, label: "Dashboard", path: "/" },
   { id: "history", icon: History, label: "History", path: "/history" },
-  { id: "trending", icon: TrendingUp, label: "Trending", path: "/" },
   { id: "about", icon: Info, label: "About", path: "/about" },
   { id: "settings", icon: Settings, label: "Settings", path: "/settings" },
 ];
