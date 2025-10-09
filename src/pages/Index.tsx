@@ -3,6 +3,7 @@ import { Sidebar } from "@/components/Sidebar";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { QuickVerify } from "@/components/dashboard/QuickVerify";
+import { VideoVerify } from "@/components/dashboard/VideoVerify";
 import { RecentVerifications } from "@/components/dashboard/RecentVerifications";
 import { TrendingNews } from "@/components/dashboard/TrendingNews";
 import { Auth } from "@/components/Auth";
@@ -81,6 +82,10 @@ const Index = () => {
             {/* Left Column - 2 cols */}
             <div className="lg:col-span-2 space-y-4 md:space-y-6 w-full min-w-0">
               <QuickVerify 
+                onVerificationComplete={() => setRefreshKey((k) => k + 1)}
+                onAuthRequired={() => setShowAuth(true)}
+              />
+              <VideoVerify
                 onVerificationComplete={() => setRefreshKey((k) => k + 1)}
                 onAuthRequired={() => setShowAuth(true)}
               />

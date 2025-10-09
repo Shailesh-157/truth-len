@@ -135,6 +135,8 @@ export type Database = {
           sources: Json | null
           user_id: string | null
           verdict: Database["public"]["Enums"]["verification_verdict"]
+          video_metadata: Json | null
+          video_url: string | null
         }
         Insert: {
           ai_analysis?: Json | null
@@ -149,6 +151,8 @@ export type Database = {
           sources?: Json | null
           user_id?: string | null
           verdict: Database["public"]["Enums"]["verification_verdict"]
+          video_metadata?: Json | null
+          video_url?: string | null
         }
         Update: {
           ai_analysis?: Json | null
@@ -163,6 +167,8 @@ export type Database = {
           sources?: Json | null
           user_id?: string | null
           verdict?: Database["public"]["Enums"]["verification_verdict"]
+          video_metadata?: Json | null
+          video_url?: string | null
         }
         Relationships: []
       }
