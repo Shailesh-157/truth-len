@@ -120,6 +120,39 @@ const About = () => {
           </Card>
         </div>
 
+        {/* Important Notice - Political & Time-Sensitive Content */}
+        <Card className="border-2 border-yellow-500/50 bg-yellow-500/5">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-yellow-600 dark:text-yellow-500">
+              <Shield className="h-6 w-6" />
+              Important: Political & Time-Sensitive Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-muted-foreground leading-relaxed">
+              For current political positions, breaking news, and time-sensitive information, 
+              TruthLens will return a verdict of <strong className="text-yellow-600 dark:text-yellow-500">"UNVERIFIED"</strong>. 
+              This is because our AI system cannot access real-time data or verify rapidly changing 
+              political situations without up-to-the-minute information.
+            </p>
+            <p className="text-muted-foreground leading-relaxed">
+              We explicitly state that we cannot verify such content and strongly recommend 
+              users consult official government sources, verified news outlets, and authoritative 
+              organizations for the most current and accurate information on:
+            </p>
+            <ul className="list-disc list-inside text-muted-foreground space-y-2 ml-4">
+              <li>Current political office holders and their positions</li>
+              <li>Recent political developments and policy changes</li>
+              <li>Breaking news and developing stories</li>
+              <li>Real-time events and announcements</li>
+            </ul>
+            <p className="text-sm text-muted-foreground italic border-l-4 border-yellow-500 pl-4">
+              Always verify time-sensitive and political information through multiple official 
+              sources before making important decisions.
+            </p>
+          </CardContent>
+        </Card>
+
         {/* Technology */}
         <Card className="border-2 bg-gradient-to-br from-primary/5 to-accent/5">
           <CardHeader>
