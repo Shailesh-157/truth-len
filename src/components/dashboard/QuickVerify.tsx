@@ -72,50 +72,50 @@ export function QuickVerify({ onVerificationComplete, onAuthRequired }: QuickVer
   };
 
   return (
-    <Card className="border-2 bg-gradient-to-br from-primary/5 to-accent/5">
+    <Card className="border-2 bg-gradient-to-br from-primary/5 to-accent/5 w-full">
       <CardHeader>
-        <CardTitle className="text-lg flex items-center gap-2">
-          <Search className="h-5 w-5 text-primary" />
+        <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+          <Search className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
           Quick Verify
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 w-full">
         <Textarea
           placeholder="Paste news text, URL, or claim to verify..."
-          className="min-h-[120px] resize-none"
+          className="min-h-[100px] sm:min-h-[120px] resize-none w-full"
           value={content}
           onChange={(e) => setContent(e.target.value)}
           disabled={isVerifying}
         />
         
-        <div className="flex gap-2">
+        <div className="flex gap-2 w-full">
           <Button
-            className="flex-1 bg-gradient-to-r from-primary to-accent hover:opacity-90"
+            className="flex-1 bg-gradient-to-r from-primary to-accent hover:opacity-90 text-sm sm:text-base min-w-0"
             onClick={handleVerify}
             disabled={isVerifying || !content.trim()}
           >
             {isVerifying ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Verifying...
+                <Loader2 className="h-4 w-4 mr-2 animate-spin flex-shrink-0" />
+                <span className="truncate">Verifying...</span>
               </>
             ) : (
               <>
-                <Search className="h-4 w-4 mr-2" />
-                Verify Now
+                <Search className="h-4 w-4 mr-2 flex-shrink-0" />
+                <span className="truncate">Verify Now</span>
               </>
             )}
           </Button>
-          <Button variant="outline" size="icon" disabled={isVerifying}>
+          <Button variant="outline" size="icon" disabled={isVerifying} className="flex-shrink-0">
             <Link2 className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="icon" disabled={isVerifying}>
+          <Button variant="outline" size="icon" disabled={isVerifying} className="flex-shrink-0">
             <Image className="h-4 w-4" />
           </Button>
         </div>
         
-        <div className="pt-2 border-t border-border">
-          <p className="text-xs text-muted-foreground text-center">
+        <div className="pt-2 border-t border-border w-full">
+          <p className="text-xs text-muted-foreground text-center break-words">
             {user 
               ? "Supports text, URLs, images, and videos" 
               : "Sign in to verify content and track your verification history"

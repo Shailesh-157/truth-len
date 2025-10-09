@@ -64,36 +64,36 @@ export function RecentVerifications() {
   };
 
   return (
-    <Card className="border-2">
+    <Card className="border-2 w-full">
       <CardHeader>
-        <CardTitle className="text-lg">Recent Verifications</CardTitle>
+        <CardTitle className="text-base sm:text-lg">Recent Verifications</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 w-full">
         {isLoading ? (
           <div className="flex items-center justify-center py-8">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
         ) : verifications.length === 0 ? (
-          <p className="text-center text-muted-foreground py-8">
+          <p className="text-center text-muted-foreground py-8 text-sm">
             No verifications yet. Try verifying some content!
           </p>
         ) : (
           verifications.map((item) => (
             <div
               key={item.id}
-              className="flex items-start gap-3 pb-4 border-b last:border-0 cursor-pointer hover:bg-secondary/50 p-2 rounded transition-colors"
+              className="flex items-start gap-2 sm:gap-3 pb-4 border-b last:border-0 cursor-pointer hover:bg-secondary/50 p-2 rounded transition-colors w-full"
               onClick={() => setSelectedVerification(item)}
             >
-              <div className="mt-1">{getIcon(item.verdict)}</div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">
-                  {item.content_text?.substring(0, 60) || "Verification"}...
+              <div className="mt-1 flex-shrink-0">{getIcon(item.verdict)}</div>
+              <div className="flex-1 min-w-0 overflow-hidden">
+                <p className="text-xs sm:text-sm font-medium truncate">
+                  {item.content_text?.substring(0, 60) || item.content_url?.substring(0, 60) || "Verification"}...
                 </p>
-                <div className="flex items-center gap-2 mt-1">
-                  <Badge variant={getBadgeVariant(item.verdict)} className="text-xs">
+                <div className="flex flex-wrap items-center gap-2 mt-1">
+                  <Badge variant={getBadgeVariant(item.verdict)} className="text-xs flex-shrink-0">
                     {item.confidence_score}% confident
                   </Badge>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-xs text-muted-foreground truncate">
                     {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}
                   </span>
                 </div>

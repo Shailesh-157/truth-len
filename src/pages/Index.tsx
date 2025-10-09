@@ -45,7 +45,7 @@ const Index = () => {
         
         <main className="p-4 md:p-6 lg:p-8 space-y-6 w-full max-w-full">
           {/* Stats Overview */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 w-full">
             <StatsCard
               title="Total Verifications"
               value="12,543"
@@ -77,9 +77,9 @@ const Index = () => {
           </div>
 
           {/* Main Content Grid */}
-          <div className="grid lg:grid-cols-3 gap-6">
+          <div className="grid lg:grid-cols-3 gap-4 md:gap-6 w-full">
             {/* Left Column - 2 cols */}
-            <div className="lg:col-span-2 space-y-6">
+            <div className="lg:col-span-2 space-y-4 md:space-y-6 w-full min-w-0">
               <QuickVerify 
                 onVerificationComplete={() => setRefreshKey((k) => k + 1)}
                 onAuthRequired={() => setShowAuth(true)}
@@ -88,7 +88,7 @@ const Index = () => {
             </div>
 
             {/* Right Column - 1 col */}
-            <div className="space-y-6">
+            <div className="space-y-4 md:space-y-6 w-full min-w-0">
               <TrendingNews />
             </div>
           </div>
