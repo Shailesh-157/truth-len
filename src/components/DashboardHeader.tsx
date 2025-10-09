@@ -93,7 +93,13 @@ export function DashboardHeader({ onSignInClick, onMenuClick }: DashboardHeaderP
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" className="w-56">
+                {/* Mobile: Show user info */}
+                <div className="sm:hidden px-3 py-3 border-b border-border">
+                  <p className="text-sm font-semibold">{displayName || 'Truth Seeker'}</p>
+                  <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+                </div>
+                
                 <DropdownMenuItem onClick={signOut}>
                   <LogOut className="h-4 w-4 mr-2" />
                   Sign Out
