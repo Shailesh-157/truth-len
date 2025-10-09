@@ -37,13 +37,13 @@ const Index = () => {
     <div className="min-h-screen flex w-full">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       
-      <div className="flex-1 lg:ml-64">
+      <div className="flex-1 lg:ml-64 w-full overflow-x-hidden">
         <DashboardHeader 
           onSignInClick={() => setShowAuth(true)}
           onMenuClick={() => setSidebarOpen(true)}
         />
         
-        <main className="p-8 space-y-6">
+        <main className="p-4 md:p-6 lg:p-8 space-y-6 w-full max-w-full">
           {/* Stats Overview */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <StatsCard

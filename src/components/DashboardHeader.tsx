@@ -25,16 +25,16 @@ export function DashboardHeader({ onSignInClick, onMenuClick }: DashboardHeaderP
   };
 
   return (
-    <header className="h-20 border-b border-border bg-background/80 backdrop-blur-md flex items-center justify-between px-4 lg:px-8">
+    <header className="h-16 md:h-20 border-b border-border bg-background/80 backdrop-blur-md flex items-center justify-between px-3 md:px-4 lg:px-8 w-full">
       {/* Mobile Menu Button */}
       <button
         onClick={onMenuClick}
-        className="lg:hidden p-2 hover:bg-secondary rounded-lg transition-colors"
+        className="lg:hidden p-2 hover:bg-secondary rounded-lg transition-colors flex-shrink-0"
       >
-        <Menu className="h-6 w-6" />
+        <Menu className="h-5 w-5 md:h-6 md:w-6" />
       </button>
       {/* Search Bar */}
-      <div className="flex-1 max-w-xl mx-4">
+      <div className="flex-1 max-w-xl mx-2 md:mx-4">
         <div className="relative hidden md:block">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -45,28 +45,28 @@ export function DashboardHeader({ onSignInClick, onMenuClick }: DashboardHeaderP
       </div>
 
       {/* Right Section */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
         <ThemeToggle />
         
         {user && (
-          <button className="relative p-2 hover:bg-secondary rounded-full transition-colors">
+          <button className="relative p-2 hover:bg-secondary rounded-full transition-colors hidden sm:block">
             <Bell className="h-5 w-5 text-muted-foreground" />
             <span className="absolute top-1 right-1 h-2 w-2 bg-destructive rounded-full" />
           </button>
         )}
 
-        <div className="flex items-center gap-3 pl-4 border-l border-border">
+        <div className="flex items-center gap-2 md:gap-3 pl-2 md:pl-4 border-l border-border">
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="gap-3 p-2">
-                  <div className="text-right">
+                <Button variant="ghost" className="gap-2 md:gap-3 p-1 md:p-2">
+                  <div className="text-right hidden sm:block">
                     <p className="text-sm font-semibold">Truth Seeker</p>
-                    <p className="text-xs text-muted-foreground">{user?.email}</p>
+                    <p className="text-xs text-muted-foreground truncate max-w-[120px] md:max-w-[180px]">{user?.email}</p>
                   </div>
-                  <Avatar>
+                  <Avatar className="h-8 w-8 md:h-10 md:w-10">
                     <AvatarImage src="" />
-                    <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-white">
+                    <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-white text-xs md:text-sm">
                       {getInitials(user?.email)}
                     </AvatarFallback>
                   </Avatar>
@@ -82,10 +82,11 @@ export function DashboardHeader({ onSignInClick, onMenuClick }: DashboardHeaderP
           ) : (
             <Button 
               onClick={onSignInClick}
-              className="bg-gradient-to-r from-primary to-accent hover:opacity-90"
+              className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-xs md:text-sm px-3 md:px-4"
+              size="sm"
             >
-              <LogIn className="h-4 w-4 mr-2" />
-              Sign In
+              <LogIn className="h-3 w-3 md:h-4 md:w-4 md:mr-2" />
+              <span className="hidden sm:inline">Sign In</span>
             </Button>
           )}
         </div>
