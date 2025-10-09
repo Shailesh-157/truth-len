@@ -1,5 +1,5 @@
 import { ThemeToggle } from "./ThemeToggle";
-import logo from "@/assets/truthlens-logo.jpg";
+import logo from "@/assets/truthlens-logo.png";
 
 export function Navbar() {
   return (
