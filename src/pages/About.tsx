@@ -4,8 +4,8 @@ import logo from "@/assets/truthlens-logo.png";
 
 const About = () => {
   return (
-    <div className="min-h-screen p-8 ml-64">
-      <div className="max-w-4xl mx-auto space-y-8">
+    <div className="min-h-screen ml-64">
+      <div className="max-w-4xl mx-auto p-8 space-y-8">
         {/* Header */}
         <div className="text-center space-y-4">
           <img
