@@ -5,10 +5,29 @@ import { StatsCard } from "@/components/dashboard/StatsCard";
 import { QuickVerify } from "@/components/dashboard/QuickVerify";
 import { RecentVerifications } from "@/components/dashboard/RecentVerifications";
 import { TrendingNews } from "@/components/dashboard/TrendingNews";
+import { Auth } from "@/components/Auth";
+import { useAuth } from "@/hooks/useAuth";
 import { Shield, CheckCircle, XCircle, TrendingUp } from "lucide-react";
 
 const Index = () => {
+  const { user, loading } = useAuth();
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Shield className="h-12 w-12 animate-pulse mx-auto mb-4 text-primary" />
+          <p className="text-muted-foreground">Loading TruthLens...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Auth onSuccess={() => setRefreshKey((k) => k + 1)} />;
+  }
 
   return (
     <div className="min-h-screen flex w-full">
@@ -54,8 +73,8 @@ const Index = () => {
           <div className="grid lg:grid-cols-3 gap-6">
             {/* Left Column - 2 cols */}
             <div className="lg:col-span-2 space-y-6">
-              <QuickVerify />
-              <RecentVerifications />
+              <QuickVerify onVerificationComplete={() => setRefreshKey((k) => k + 1)} />
+              <RecentVerifications key={refreshKey} />
             </div>
 
             {/* Right Column - 1 col */}

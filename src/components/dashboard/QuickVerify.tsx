@@ -1,9 +1,62 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Search, Link2, Image } from "lucide-react";
+import { Search, Link2, Image, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
-export function QuickVerify() {
+interface QuickVerifyProps {
+  onVerificationComplete?: () => void;
+}
+
+export function QuickVerify({ onVerificationComplete }: QuickVerifyProps) {
+  const [content, setContent] = useState("");
+  const [isVerifying, setIsVerifying] = useState(false);
+
+  const handleVerify = async () => {
+    if (!content.trim()) {
+      toast.error("Please enter some content to verify");
+      return;
+    }
+
+    setIsVerifying(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("verify-content", {
+        body: {
+          contentText: content,
+          contentType: "text",
+        },
+      });
+
+      if (error) throw error;
+
+      const { analysis } = data;
+      
+      // Show result toast
+      const verdictEmoji = {
+        true: "✅",
+        false: "❌",
+        misleading: "⚠️",
+        unverified: "❓",
+      }[analysis.verdict];
+
+      toast.success(`${verdictEmoji} ${analysis.verdict.toUpperCase()}`, {
+        description: `Confidence: ${analysis.confidence}% - ${analysis.explanation.substring(0, 100)}...`,
+        duration: 5000,
+      });
+
+      setContent("");
+      onVerificationComplete?.();
+    } catch (error: any) {
+      console.error("Verification error:", error);
+      toast.error(error.message || "Failed to verify content");
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
   return (
     <Card className="border-2 bg-gradient-to-br from-primary/5 to-accent/5">
       <CardHeader>
@@ -16,17 +69,33 @@ export function QuickVerify() {
         <Textarea
           placeholder="Paste news text, URL, or claim to verify..."
           className="min-h-[120px] resize-none"
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          disabled={isVerifying}
         />
         
         <div className="flex gap-2">
-          <Button className="flex-1 bg-gradient-to-r from-primary to-accent hover:opacity-90">
-            <Search className="h-4 w-4 mr-2" />
-            Verify Now
+          <Button
+            className="flex-1 bg-gradient-to-r from-primary to-accent hover:opacity-90"
+            onClick={handleVerify}
+            disabled={isVerifying || !content.trim()}
+          >
+            {isVerifying ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Verifying...
+              </>
+            ) : (
+              <>
+                <Search className="h-4 w-4 mr-2" />
+                Verify Now
+              </>
+            )}
           </Button>
-          <Button variant="outline" size="icon">
+          <Button variant="outline" size="icon" disabled={isVerifying}>
             <Link2 className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="icon">
+          <Button variant="outline" size="icon" disabled={isVerifying}>
             <Image className="h-4 w-4" />
           </Button>
         </div>

@@ -1,49 +1,96 @@
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import { CheckCircle, XCircle, AlertCircle, HelpCircle, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { formatDistanceToNow } from "date-fns";
 
 interface Verification {
-  id: number;
-  title: string;
-  verdict: "true" | "false" | "misleading";
-  confidence: number;
-  time: string;
+  id: string;
+  content_text: string | null;
+  verdict: "true" | "false" | "misleading" | "unverified";
+  confidence_score: number;
+  created_at: string;
 }
 
-const recentVerifications: Verification[] = [
-  { id: 1, title: "Breaking: New AI breakthrough announced", verdict: "true", confidence: 94, time: "2 hours ago" },
-  { id: 2, title: "Viral claim about health benefits", verdict: "false", confidence: 87, time: "4 hours ago" },
-  { id: 3, title: "Political statement verification", verdict: "misleading", confidence: 72, time: "6 hours ago" },
-];
-
 export function RecentVerifications() {
+  const [verifications, setVerifications] = useState<Verification[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    loadVerifications();
+  }, []);
+
+  const loadVerifications = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("verifications")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(5);
+
+      if (error) throw error;
+      setVerifications(data || []);
+    } catch (error) {
+      console.error("Error loading verifications:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getIcon = (verdict: string) => {
+    switch (verdict) {
+      case "true":
+        return <CheckCircle className="h-5 w-5 text-green-500" />;
+      case "false":
+        return <XCircle className="h-5 w-5 text-red-500" />;
+      case "misleading":
+        return <AlertCircle className="h-5 w-5 text-yellow-500" />;
+      default:
+        return <HelpCircle className="h-5 w-5 text-gray-500" />;
+    }
+  };
+
+  const getBadgeVariant = (verdict: string) => {
+    if (verdict === "true") return "default";
+    if (verdict === "false") return "destructive";
+    return "secondary";
+  };
+
   return (
     <Card className="border-2">
       <CardHeader>
         <CardTitle className="text-lg">Recent Verifications</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {recentVerifications.map((item) => (
-          <div key={item.id} className="flex items-start gap-3 pb-4 border-b last:border-0">
-            <div className="mt-1">
-              {item.verdict === "true" && <CheckCircle className="h-5 w-5 text-green-500" />}
-              {item.verdict === "false" && <XCircle className="h-5 w-5 text-red-500" />}
-              {item.verdict === "misleading" && <AlertCircle className="h-5 w-5 text-yellow-500" />}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{item.title}</p>
-              <div className="flex items-center gap-2 mt-1">
-                <Badge 
-                  variant={item.verdict === "true" ? "default" : item.verdict === "false" ? "destructive" : "secondary"}
-                  className="text-xs"
-                >
-                  {item.confidence}% confident
-                </Badge>
-                <span className="text-xs text-muted-foreground">{item.time}</span>
+        {isLoading ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : verifications.length === 0 ? (
+          <p className="text-center text-muted-foreground py-8">
+            No verifications yet. Try verifying some content!
+          </p>
+        ) : (
+          verifications.map((item) => (
+            <div key={item.id} className="flex items-start gap-3 pb-4 border-b last:border-0">
+              <div className="mt-1">{getIcon(item.verdict)}</div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">
+                  {item.content_text?.substring(0, 60) || "Verification"}...
+                </p>
+                <div className="flex items-center gap-2 mt-1">
+                  <Badge variant={getBadgeVariant(item.verdict)} className="text-xs">
+                    {item.confidence_score}% confident
+                  </Badge>
+                  <span className="text-xs text-muted-foreground">
+                    {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </CardContent>
     </Card>
   );
