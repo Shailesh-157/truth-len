@@ -14,7 +14,111 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          display_name: string | null
+          id: string
+          total_verifications: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          id?: string
+          total_verifications?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          id?: string
+          total_verifications?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      trending_topics: {
+        Row: {
+          average_accuracy: number | null
+          created_at: string | null
+          id: string
+          last_updated: string | null
+          topic_name: string
+          trend_direction: string | null
+          verification_count: number | null
+        }
+        Insert: {
+          average_accuracy?: number | null
+          created_at?: string | null
+          id?: string
+          last_updated?: string | null
+          topic_name: string
+          trend_direction?: string | null
+          verification_count?: number | null
+        }
+        Update: {
+          average_accuracy?: number | null
+          created_at?: string | null
+          id?: string
+          last_updated?: string | null
+          topic_name?: string
+          trend_direction?: string | null
+          verification_count?: number | null
+        }
+        Relationships: []
+      }
+      verifications: {
+        Row: {
+          ai_analysis: Json | null
+          confidence_score: number
+          content_text: string | null
+          content_type: Database["public"]["Enums"]["content_type"]
+          content_url: string | null
+          created_at: string | null
+          explanation: string | null
+          id: string
+          is_trending: boolean | null
+          sources: Json | null
+          user_id: string | null
+          verdict: Database["public"]["Enums"]["verification_verdict"]
+        }
+        Insert: {
+          ai_analysis?: Json | null
+          confidence_score: number
+          content_text?: string | null
+          content_type: Database["public"]["Enums"]["content_type"]
+          content_url?: string | null
+          created_at?: string | null
+          explanation?: string | null
+          id?: string
+          is_trending?: boolean | null
+          sources?: Json | null
+          user_id?: string | null
+          verdict: Database["public"]["Enums"]["verification_verdict"]
+        }
+        Update: {
+          ai_analysis?: Json | null
+          confidence_score?: number
+          content_text?: string | null
+          content_type?: Database["public"]["Enums"]["content_type"]
+          content_url?: string | null
+          created_at?: string | null
+          explanation?: string | null
+          id?: string
+          is_trending?: boolean | null
+          sources?: Json | null
+          user_id?: string | null
+          verdict?: Database["public"]["Enums"]["verification_verdict"]
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +127,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      content_type: "text" | "url" | "image" | "video"
+      verification_verdict: "true" | "false" | "misleading" | "unverified"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +255,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      content_type: ["text", "url", "image", "video"],
+      verification_verdict: ["true", "false", "misleading", "unverified"],
+    },
   },
 } as const
