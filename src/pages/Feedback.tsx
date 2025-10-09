@@ -4,10 +4,13 @@ import { DashboardHeader } from "@/components/DashboardHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
 import { FeedbackDialog } from "@/components/FeedbackDialog";
 import { supabase } from "@/integrations/supabase/client";
-import { MessageSquare, Plus, Calendar } from "lucide-react";
+import { useAdminRole } from "@/hooks/useAdminRole";
+import { MessageSquare, Plus, Calendar, Reply } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { toast } from "sonner";
 
 interface Feedback {
   id: string;
@@ -17,6 +20,9 @@ interface Feedback {
   rating: number | null;
   status: string;
   created_at: string;
+  reply: string | null;
+  replied_at: string | null;
+  replied_by: string | null;
 }
 
 export default function Feedback() {
@@ -24,6 +30,9 @@ export default function Feedback() {
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [loading, setLoading] = useState(true);
+  const [replyText, setReplyText] = useState<{ [key: string]: string }>({});
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const { isAdmin } = useAdminRole();
 
   useEffect(() => {
     loadFeedback();
@@ -60,6 +69,38 @@ export default function Feedback() {
       case "resolved": return "default";
       case "reviewed": return "secondary";
       default: return "outline";
+    }
+  };
+
+  const handleReply = async (feedbackId: string) => {
+    const reply = replyText[feedbackId];
+    if (!reply?.trim()) {
+      toast.error("Please enter a reply");
+      return;
+    }
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const { error } = await supabase
+        .from("feedback")
+        .update({
+          reply: reply.trim(),
+          replied_at: new Date().toISOString(),
+          replied_by: user.id,
+          status: "resolved"
+        })
+        .eq("id", feedbackId);
+
+      if (error) throw error;
+
+      toast.success("Reply sent successfully");
+      setReplyText({ ...replyText, [feedbackId]: "" });
+      setReplyingTo(null);
+      loadFeedback();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to send reply");
     }
   };
 
@@ -129,8 +170,53 @@ export default function Feedback() {
                       )}
                     </div>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="space-y-4">
                     <p className="text-sm whitespace-pre-wrap">{feedback.message}</p>
+                    
+                    {feedback.reply && (
+                      <div className="mt-4 p-4 bg-primary/5 rounded-lg border border-primary/20">
+                        <div className="flex items-start gap-2">
+                          <Reply className="h-4 w-4 text-primary mt-1" />
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-primary mb-1">Admin Reply</p>
+                            <p className="text-sm whitespace-pre-wrap">{feedback.reply}</p>
+                            {feedback.replied_at && (
+                              <p className="text-xs text-muted-foreground mt-2">
+                                {formatDistanceToNow(new Date(feedback.replied_at), { addSuffix: true })}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {isAdmin && !feedback.reply && (
+                      <div className="mt-4">
+                        {replyingTo === feedback.id ? (
+                          <div className="space-y-2">
+                            <Textarea
+                              placeholder="Type your reply..."
+                              value={replyText[feedback.id] || ""}
+                              onChange={(e) => setReplyText({ ...replyText, [feedback.id]: e.target.value })}
+                              className="min-h-[100px]"
+                            />
+                            <div className="flex gap-2">
+                              <Button onClick={() => handleReply(feedback.id)} size="sm">
+                                Send Reply
+                              </Button>
+                              <Button onClick={() => setReplyingTo(null)} variant="outline" size="sm">
+                                Cancel
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <Button onClick={() => setReplyingTo(feedback.id)} variant="outline" size="sm">
+                            <Reply className="h-4 w-4 mr-2" />
+                            Reply
+                          </Button>
+                        )}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               ))}
