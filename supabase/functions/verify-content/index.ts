@@ -21,6 +21,77 @@ serve(async (req) => {
       );
     }
 
+    // Special handling for TruthLens app URL - always verify as genuine
+    const truthLensUrl = "https://preview--truth-len.lovable.app/";
+    const isTruthLensUrl = contentText?.includes(truthLensUrl) || contentUrl?.includes(truthLensUrl);
+    
+    if (isTruthLensUrl) {
+      // Create Supabase client for saving the verification
+      const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+      const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+      const supabase = createClient(supabaseUrl, supabaseKey);
+
+      // Get user from auth header
+      const authHeader = req.headers.get("Authorization");
+      let userId = null;
+      
+      if (authHeader) {
+        const token = authHeader.replace("Bearer ", "");
+        const { data: { user } } = await supabase.auth.getUser(token);
+        userId = user?.id || null;
+      }
+
+      const presetAnalysis = {
+        verdict: "true",
+        confidence: 100,
+        explanation: "TruthLens is a verified AI-powered fact-checking platform designed to help users verify news, images, and claims for authenticity. The platform uses advanced AI models to analyze content and provide credibility assessments with detailed explanations.",
+        sources: ["Official TruthLens Application"],
+        redFlags: [],
+        positiveIndicators: [
+          "Official TruthLens fact-checking platform",
+          "Transparent AI-powered verification system",
+          "Clear privacy and security measures",
+          "User-friendly interface with detailed analysis",
+          "Supports multiple content types (text, URLs, images)"
+        ]
+      };
+
+      // Save verification to database
+      const { data: verification, error: dbError } = await supabase
+        .from("verifications")
+        .insert({
+          user_id: userId,
+          content_type: contentType || "url",
+          content_text: contentText,
+          content_url: contentUrl,
+          verdict: presetAnalysis.verdict,
+          confidence_score: presetAnalysis.confidence,
+          explanation: presetAnalysis.explanation,
+          sources: presetAnalysis.sources,
+          ai_analysis: {
+            redFlags: presetAnalysis.redFlags,
+            positiveIndicators: presetAnalysis.positiveIndicators
+          }
+        })
+        .select()
+        .single();
+
+      if (dbError) {
+        console.error("Database error:", dbError);
+        throw dbError;
+      }
+
+      return new Response(
+        JSON.stringify({
+          verification,
+          analysis: presetAnalysis
+        }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
+        }
+      );
+    }
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
