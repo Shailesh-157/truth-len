@@ -1,4 +1,4 @@
-import { Home, History, TrendingUp, Settings, Info, MessageSquare, X } from "lucide-react";
+import { Home, History, TrendingUp, Settings, Info, MessageSquare, Rocket, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "react-router-dom";
 import logo from "@/assets/truthlens-logo.png";
@@ -12,6 +12,7 @@ const menuItems = [
   { id: "dashboard", icon: Home, label: "Dashboard", path: "/" },
   { id: "history", icon: History, label: "History", path: "/history" },
   { id: "feedback", icon: MessageSquare, label: "Feedback", path: "/feedback" },
+  { id: "production", icon: Rocket, label: "Production", path: "/production" },
   { id: "about", icon: Info, label: "About", path: "/about" },
   { id: "settings", icon: Settings, label: "Settings", path: "/settings" },
 ];
