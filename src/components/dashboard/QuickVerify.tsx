@@ -13,6 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { VerificationDialog } from "@/components/VerificationDialog";
 
 interface QuickVerifyProps {
   onVerificationComplete?: () => void;
@@ -28,6 +29,8 @@ export function QuickVerify({ onVerificationComplete, onAuthRequired }: QuickVer
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [showImageDialog, setShowImageDialog] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [verificationResult, setVerificationResult] = useState<any>(null);
+  const [showResultDialog, setShowResultDialog] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const processImage = (file: File) => {
@@ -139,20 +142,11 @@ export function QuickVerify({ onVerificationComplete, onAuthRequired }: QuickVer
 
       if (error) throw error;
 
-      const { analysis } = data;
+      const { analysis, verification } = data;
       
-      // Show result toast
-      const verdictEmoji = {
-        true: "✅",
-        false: "❌",
-        misleading: "⚠️",
-        unverified: "❓",
-      }[analysis.verdict];
-
-      toast.success(`${verdictEmoji} ${analysis.verdict.toUpperCase()}`, {
-        description: `Confidence: ${analysis.confidence}% - ${analysis.explanation.substring(0, 100)}...`,
-        duration: 5000,
-      });
+      // Store the full verification result to show in dialog
+      setVerificationResult(verification);
+      setShowResultDialog(true);
 
       setContent("");
       clearImage();
@@ -308,6 +302,13 @@ export function QuickVerify({ onVerificationComplete, onAuthRequired }: QuickVer
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Verification Result Dialog */}
+      <VerificationDialog
+        open={showResultDialog}
+        onOpenChange={setShowResultDialog}
+        verification={verificationResult}
+      />
     </Card>
   );
 }
