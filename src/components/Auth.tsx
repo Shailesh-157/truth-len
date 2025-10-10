@@ -32,13 +32,8 @@ export function Auth({ onSuccess }: { onSuccess: () => void }) {
       if (error) throw error;
 
       if (data.user) {
-        // Create profile
-        await supabase.from("profiles").insert({
-          user_id: data.user.id,
-          display_name: displayName,
-        });
-
-        toast.success("Account created successfully!");
+        // Profile is automatically created by database trigger
+        toast.success("Account created successfully! You can now sign in.");
         onSuccess();
       }
     } catch (error: any) {
