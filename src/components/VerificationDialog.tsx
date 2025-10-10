@@ -210,21 +210,30 @@ export function VerificationDialog({
             <div className="space-y-2">
               <h3 className="font-semibold text-sm sm:text-base">Credible Sources</h3>
               <ul className="space-y-2">
-                {sources.map((source: string, index: number) => (
-                  <li
-                    key={index}
-                    className="text-xs sm:text-sm break-words"
-                  >
-                    <a 
-                      href={source} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-primary hover:underline cursor-pointer"
+                {sources.map((source: string, index: number) => {
+                  // Check if source is a URL
+                  const isUrl = source.startsWith('http://') || source.startsWith('https://');
+                  
+                  return (
+                    <li
+                      key={index}
+                      className="text-xs sm:text-sm break-words"
                     >
-                      {source}
-                    </a>
-                  </li>
-                ))}
+                      {isUrl ? (
+                        <a 
+                          href={source} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline cursor-pointer"
+                        >
+                          {source}
+                        </a>
+                      ) : (
+                        <span className="text-primary">{source}</span>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           )}
