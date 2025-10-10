@@ -6,7 +6,8 @@ import { Label } from "./ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { toast } from "sonner";
-import { Eye, Mail, Lock } from "lucide-react";
+import { Eye, Mail, Lock, AlertTriangle } from "lucide-react";
+import zxcvbn from "zxcvbn";
 
 export function Auth({ onSuccess }: { onSuccess: () => void }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -16,6 +17,7 @@ export function Auth({ onSuccess }: { onSuccess: () => void }) {
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
   const validatePassword = (password: string): string | null => {
+    // Check basic requirements
     if (password.length < 8) {
       return "Password must be at least 8 characters";
     }
@@ -31,6 +33,17 @@ export function Auth({ onSuccess }: { onSuccess: () => void }) {
     if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
       return "Password must contain at least one special character";
     }
+
+    // Check against common/leaked passwords using zxcvbn
+    const result = zxcvbn(password);
+    
+    // Score ranges from 0 (weak) to 4 (strong)
+    // Reject passwords with score less than 3
+    if (result.score < 3) {
+      const feedback = result.feedback.warning || "Password is too common or weak";
+      return `${feedback}. Please choose a stronger password.`;
+    }
+
     return null;
   };
 
@@ -201,7 +214,10 @@ export function Auth({ onSuccess }: { onSuccess: () => void }) {
                     Must contain: 8+ characters, uppercase, lowercase, number, special character
                   </p>
                   {passwordError && (
-                    <p className="text-xs text-destructive mt-1">{passwordError}</p>
+                    <div className="flex items-start gap-2 mt-1 text-xs text-destructive">
+                      <AlertTriangle className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                      <span>{passwordError}</span>
+                    </div>
                   )}
                 </div>
                 <Button
