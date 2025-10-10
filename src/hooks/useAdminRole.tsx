@@ -15,24 +15,15 @@ export function useAdminRole() {
     }
 
     const checkAdminRole = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', user.id)
-          .eq('role', 'admin')
-          .single();
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('role', 'admin')
+        .maybeSingle();
 
-        if (!error && data) {
-          setIsAdmin(true);
-        } else {
-          setIsAdmin(false);
-        }
-      } catch (error) {
-        setIsAdmin(false);
-      } finally {
-        setLoading(false);
-      }
+      setIsAdmin(!!data && !error);
+      setLoading(false);
     };
 
     checkAdminRole();

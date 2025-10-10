@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,14 +13,29 @@ serve(async (req) => {
   }
 
   try {
-    const { contentText, contentUrl, contentType, imageData } = await req.json();
+    // Define input validation schema
+    const inputSchema = z.object({
+      contentText: z.string().max(5000).optional(),
+      contentUrl: z.string().url().max(2000).optional(),
+      contentType: z.enum(['text', 'url', 'image']).optional(),
+      imageData: z.string().optional()
+    }).refine(
+      data => data.contentText || data.contentUrl || data.imageData,
+      { message: 'At least one content field (contentText, contentUrl, or imageData) is required' }
+    );
+
+    // Parse and validate input
+    const rawBody = await req.json();
+    const validationResult = inputSchema.safeParse(rawBody);
     
-    if (!contentText && !contentUrl && !imageData) {
+    if (!validationResult.success) {
       return new Response(
-        JSON.stringify({ error: "Content text, URL, or image is required" }),
+        JSON.stringify({ error: "Invalid input data" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    const { contentText, contentUrl, contentType, imageData } = validationResult.data;
 
     // Special handling for TruthLens app URL - always verify as genuine
     const truthLensUrl = "https://preview--truth-len.lovable.app/";
@@ -77,8 +93,8 @@ serve(async (req) => {
         .single();
 
       if (dbError) {
-        console.error("Database error:", dbError);
-        throw dbError;
+        console.error("Verification save failed");
+        throw new Error("Failed to save verification");
       }
 
       return new Response(
@@ -267,13 +283,11 @@ Format response using verify_news function.`
           { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      const errorText = await aiResponse.text();
-      console.error("AI gateway error:", aiResponse.status, errorText);
-      throw new Error("AI gateway error");
+      console.error("AI gateway returned error status");
+      throw new Error("AI verification service unavailable");
     }
 
     const aiData = await aiResponse.json();
-    console.log("AI Response:", JSON.stringify(aiData, null, 2));
 
     // Extract structured output from tool call
     const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
@@ -321,8 +335,8 @@ Format response using verify_news function.`
       .single();
 
     if (dbError) {
-      console.error("Database error:", dbError);
-      throw dbError;
+      console.error("Verification save failed");
+      throw new Error("Failed to save verification");
     }
 
     return new Response(
@@ -335,9 +349,9 @@ Format response using verify_news function.`
       }
     );
   } catch (error) {
-    console.error("Error in verify-content function:", error);
+    console.error("Verification request failed");
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
+      JSON.stringify({ error: "Unable to process verification request" }),
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" }
