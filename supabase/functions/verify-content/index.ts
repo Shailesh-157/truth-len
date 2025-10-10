@@ -200,9 +200,15 @@ ANALYSIS FRAMEWORK:
 - Note: Cannot verify current company status or real-time reviews
 
 🔍 FOR URLs/WEBSITES:
-- Domain structure analysis (suspicious patterns)
-- Security indicators in URL structure
-- Known phishing patterns
+⚠️ MANDATORY URL ANALYSIS DISCLAIMER:
+For ALL URL verifications, your explanation MUST START with:
+"I cannot access external websites or URLs, so my analysis is based solely on the URL structure. The domain uses HTTPS [if applicable], which provides basic security."
+
+Then analyze:
+- Domain structure analysis (suspicious patterns, credible news domains)
+- Security indicators in URL structure (HTTPS presence)
+- Known phishing patterns or legitimate news sources
+- Domain reputation based on general knowledge
 - Note: Cannot access the actual website content or verify current status
 
 OUTPUT REQUIREMENTS:
