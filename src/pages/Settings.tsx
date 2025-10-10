@@ -153,6 +153,30 @@ const Settings = () => {
               </div>
               <Switch id="anonymous-mode" />
             </div>
+            
+            <div className="border-t pt-4 mt-4 space-y-3">
+              <h4 className="font-semibold text-sm">Data Protection & Compliance</h4>
+              <div className="text-xs text-muted-foreground space-y-2">
+                <p>
+                  <strong>GDPR Compliance:</strong> We process your data in accordance with EU General Data Protection Regulation. 
+                  Your verification history and personal data are encrypted using AES-256 encryption and stored securely.
+                </p>
+                <p>
+                  <strong>Indian IT Act Compliance:</strong> This platform complies with the Information Technology Act, 2000 and 
+                  Information Technology (Reasonable Security Practices and Procedures and Sensitive Personal Data or Information) Rules, 2011.
+                </p>
+                <p>
+                  <strong>Data Protection:</strong> All communications use HTTPS encryption. We do not share your data with third parties 
+                  without explicit consent. You have the right to request data deletion at any time.
+                </p>
+                <p className="text-xs">
+                  For privacy concerns, contact:{" "}
+                  <a href="mailto:shaileshpandey0408@gmail.com" className="text-primary hover:underline">
+                    shaileshpandey0408@gmail.com
+                  </a>
+                </p>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
