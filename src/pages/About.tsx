@@ -191,16 +191,23 @@ const About = () => {
             <CardTitle>Get in Touch</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground">
-              Have questions or feedback? We'd love to hear from you. Reach out to
-              us at{" "}
-              <a
-                href="mailto:contact@truthlens.com"
-                className="text-primary hover:underline"
-              >
-                contact@truthlens.com
-              </a>
+            <p className="text-muted-foreground mb-4">
+              Have questions or feedback? We'd love to hear from you.
             </p>
+            <div className="space-y-2">
+              <p className="text-muted-foreground">
+                <span className="font-semibold">Developer:</span> Shailesh Pandey
+              </p>
+              <p className="text-muted-foreground">
+                <span className="font-semibold">Email:</span>{" "}
+                <a
+                  href="mailto:shaileshpandey0408@gmail.com"
+                  className="text-primary hover:underline"
+                >
+                  shaileshpandey0408@gmail.com
+                </a>
+              </p>
+            </div>
           </CardContent>
         </Card>
         </div>
