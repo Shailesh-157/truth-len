@@ -8,6 +8,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Star, Send } from "lucide-react";
+import { z } from "zod";
+
+const feedbackSchema = z.object({
+  subject: z.string().trim().min(5, "Subject must be at least 5 characters").max(200, "Subject must not exceed 200 characters"),
+  message: z.string().trim().min(10, "Message must be at least 10 characters").max(2000, "Message must not exceed 2000 characters"),
+  feedbackType: z.enum(["general", "bug", "feature", "improvement", "accuracy"]),
+  rating: z.number().min(0).max(5).optional(),
+});
 
 interface FeedbackDialogProps {
   open: boolean;
@@ -26,10 +34,19 @@ export function FeedbackDialog({ open, onOpenChange, verificationId }: FeedbackD
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!subject.trim() || !message.trim()) {
+    // Validate input with zod schema
+    const validationResult = feedbackSchema.safeParse({
+      subject,
+      message,
+      feedbackType,
+      rating: rating > 0 ? rating : undefined,
+    });
+
+    if (!validationResult.success) {
+      const firstError = validationResult.error.errors[0];
       toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields",
+        title: "Validation Error",
+        description: firstError.message,
         variant: "destructive",
       });
       return;
@@ -116,8 +133,10 @@ export function FeedbackDialog({ open, onOpenChange, verificationId }: FeedbackD
               placeholder="Brief summary of your feedback"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
+              maxLength={200}
               required
             />
+            <p className="text-xs text-muted-foreground">{subject.length}/200 characters</p>
           </div>
 
           <div className="space-y-2">
@@ -128,8 +147,10 @@ export function FeedbackDialog({ open, onOpenChange, verificationId }: FeedbackD
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               rows={5}
+              maxLength={2000}
               required
             />
+            <p className="text-xs text-muted-foreground">{message.length}/2000 characters</p>
           </div>
 
           <div className="space-y-2">

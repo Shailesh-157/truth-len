@@ -11,6 +11,9 @@ import { useAdminRole } from "@/hooks/useAdminRole";
 import { MessageSquare, Plus, Calendar, Reply } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
+import { z } from "zod";
+
+const replySchema = z.string().trim().min(10, "Reply must be at least 10 characters").max(2000, "Reply must not exceed 2000 characters");
 
 interface Feedback {
   id: string;
@@ -74,8 +77,12 @@ export default function Feedback() {
 
   const handleReply = async (feedbackId: string) => {
     const reply = replyText[feedbackId];
-    if (!reply?.trim()) {
-      toast.error("Please enter a reply");
+    
+    // Validate reply with zod schema
+    const validationResult = replySchema.safeParse(reply);
+    
+    if (!validationResult.success) {
+      toast.error(validationResult.error.errors[0].message);
       return;
     }
 
@@ -199,7 +206,11 @@ export default function Feedback() {
                               value={replyText[feedback.id] || ""}
                               onChange={(e) => setReplyText({ ...replyText, [feedback.id]: e.target.value })}
                               className="min-h-[100px]"
+                              maxLength={2000}
                             />
+                            <p className="text-xs text-muted-foreground">
+                              {(replyText[feedback.id] || "").length}/2000 characters
+                            </p>
                             <div className="flex gap-2">
                               <Button onClick={() => handleReply(feedback.id)} size="sm">
                                 Send Reply
