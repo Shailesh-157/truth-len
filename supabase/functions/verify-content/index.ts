@@ -274,6 +274,9 @@ serve(async (req) => {
 
 Provide a detailed verdict on whether this image is AUTHENTIC, MANIPULATED, AI-GENERATED, or needs further verification.`;
 
+      // Ensure the image data has the correct format
+      const imageUrl = imageData.startsWith('data:') ? imageData : `data:image/jpeg;base64,${imageData}`;
+      
       messageContent = [
         {
           type: "text",
@@ -282,7 +285,7 @@ Provide a detailed verdict on whether this image is AUTHENTIC, MANIPULATED, AI-G
         {
           type: "image_url",
           image_url: {
-            url: imageData
+            url: imageUrl
           }
         }
       ];
