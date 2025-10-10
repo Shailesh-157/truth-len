@@ -40,8 +40,17 @@ export function FeedbackDialog({ open, onOpenChange, verificationId }: FeedbackD
     try {
       const { data: { user } } = await supabase.auth.getUser();
 
+      if (!user) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to submit feedback",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const { error } = await supabase.from("feedback").insert({
-        user_id: user?.id || null,
+        user_id: user.id,
         verification_id: verificationId || null,
         feedback_type: feedbackType,
         subject: subject.trim(),
