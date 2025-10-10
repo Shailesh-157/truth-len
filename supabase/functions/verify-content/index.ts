@@ -202,6 +202,38 @@ serve(async (req) => {
       }
     }
 
+    // Fetch URL content if URL is provided
+    let urlContent = "";
+    if (contentUrl) {
+      try {
+        console.log(`Fetching content from URL: ${contentUrl}`);
+        const urlResponse = await fetch(contentUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (compatible; TruthLens/1.0; +https://truthlens.app)'
+          },
+          redirect: 'follow'
+        });
+        
+        if (urlResponse.ok) {
+          const htmlContent = await urlResponse.text();
+          // Extract text content from HTML (simple extraction)
+          const textContent = htmlContent
+            .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+            .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+            .replace(/<[^>]+>/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim()
+            .slice(0, 4000); // Limit to 4000 chars
+          
+          urlContent = textContent;
+          console.log(`Extracted ${urlContent.length} characters from URL`);
+        }
+      } catch (error) {
+        console.error("URL fetch error:", error);
+        urlContent = "";
+      }
+    }
+
     // Fetch real-time web search results for current information
     let webSearchResults = [];
     if (GOOGLE_SEARCH_API_KEY && GOOGLE_SEARCH_ENGINE_ID && (contentText || contentUrl)) {
@@ -230,11 +262,22 @@ serve(async (req) => {
     let messageContent: any[];
     
     if (imageData) {
-      // For image analysis
+      // For image analysis with comprehensive forensic prompt
+      const imageAnalysisPrompt = contentText || `Perform a comprehensive forensic analysis of this image to verify its authenticity:
+
+1. **AI Generation Detection**: Check for artifacts common in AI-generated images (Midjourney, DALL-E, Stable Diffusion, etc.)
+2. **Photo Manipulation**: Look for cloning, warping, color inconsistencies, unnatural edges
+3. **Physical Consistency**: Analyze lighting, shadows, reflections, and perspective
+4. **Metadata Indicators**: Note any compression artifacts or editing signs
+5. **Contextual Analysis**: Does the image logically match its claimed context?
+6. **Temporal Markers**: Any date/time inconsistencies visible in the image?
+
+Provide a detailed verdict on whether this image is AUTHENTIC, MANIPULATED, AI-GENERATED, or needs further verification.`;
+
       messageContent = [
         {
           type: "text",
-          text: contentText || "Analyze this image for authenticity, credibility, and potential misinformation. Is this image real or fake/manipulated?"
+          text: imageAnalysisPrompt
         },
         {
           type: "image_url",
@@ -244,10 +287,33 @@ serve(async (req) => {
         }
       ];
     } else {
-      // For text/URL analysis
-      const analysisPrompt = contentUrl 
-        ? `Analyze this news URL for credibility: ${contentUrl}\n\nContent: ${contentText || 'No additional text provided'}`
-        : `Analyze this news claim for credibility: ${contentText}`;
+      // For text/URL analysis with enhanced context
+      let analysisPrompt = "";
+      
+      if (contentUrl && urlContent) {
+        analysisPrompt = `Analyze this article/webpage for credibility and fact-check all claims:
+
+**URL:** ${contentUrl}
+
+**Extracted Content:**
+${urlContent}
+
+**User's Additional Context:** ${contentText || 'None provided'}
+
+Verify ALL factual claims in this content against real-time web search and fact-check data.`;
+      } else if (contentUrl) {
+        analysisPrompt = `Analyze this URL for credibility: ${contentUrl}
+
+**User's Context:** ${contentText || 'No additional context'}
+
+Note: Unable to fetch URL content. Analyze based on URL structure and available web search data.`;
+      } else {
+        analysisPrompt = `Fact-check this claim thoroughly using all available real-time data:
+
+**Claim:** ${contentText}
+
+Cross-reference with web search results and fact-checker databases. Verify ALL factual assertions.`;
+      }
       
       messageContent = [{
         type: "text",
@@ -372,16 +438,18 @@ ANALYSIS FRAMEWORK:
 - Note: Cannot verify current company status or real-time reviews
 
 🔍 FOR URLs/WEBSITES:
-⚠️ MANDATORY URL ANALYSIS DISCLAIMER:
-For ALL URL verifications, your explanation MUST START with:
-"I cannot access external websites or URLs, so my analysis is based solely on the URL structure. The domain uses HTTPS [if applicable], which provides basic security."
+✅ **URL CONTENT ANALYSIS AVAILABLE:**
+When URL content is provided (extracted from the webpage), you have:
+- Full article text and claims to fact-check
+- Ability to verify all factual assertions in the content
+- Cross-reference claims with real-time web search
+- Assess journalistic quality and bias
 
-Then analyze:
-- Domain structure analysis (suspicious patterns, credible news domains)
-- Security indicators in URL structure (HTTPS presence)
-- Known phishing patterns or legitimate news sources
-- Domain reputation based on general knowledge
-- Note: Cannot access the actual website content or verify current status
+If URL content is NOT available:
+- Analyze URL structure (domain credibility, HTTPS)
+- Use web search results to find information about the URL/domain
+- Check if domain appears in credible sources or fact-check databases
+- Note: Limited to URL structure analysis without content access
 
 OUTPUT REQUIREMENTS:
 - **ALWAYS PRIORITIZE real-time data** (web search + fact-checks) over your training knowledge
