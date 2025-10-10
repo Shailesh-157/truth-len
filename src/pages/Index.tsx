@@ -3,15 +3,16 @@ import { Sidebar } from "@/components/Sidebar";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { QuickVerify } from "@/components/dashboard/QuickVerify";
-
 import { RecentVerifications } from "@/components/dashboard/RecentVerifications";
 import { TrendingNews } from "@/components/dashboard/TrendingNews";
 import { Auth } from "@/components/Auth";
 import { useAuth } from "@/hooks/useAuth";
+import { useStats } from "@/hooks/useStats";
 import { Shield, CheckCircle, XCircle, TrendingUp } from "lucide-react";
 
 const Index = () => {
   const { user, loading } = useAuth();
+  const stats = useStats();
   const [refreshKey, setRefreshKey] = useState(0);
   const [showAuth, setShowAuth] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -49,29 +50,45 @@ const Index = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 w-full">
             <StatsCard
               title="Total Verifications"
-              value="12,543"
-              trend="+12% from last week"
+              value={stats.loading ? "..." : stats.totalVerifications.toLocaleString()}
+              trend={
+                stats.totalVerifications > 0
+                  ? `${stats.totalVerifications} verification${stats.totalVerifications !== 1 ? "s" : ""} recorded`
+                  : "No verifications yet"
+              }
               icon={Shield}
               iconColor="from-blue-500 to-blue-600"
             />
             <StatsCard
               title="Verified True"
-              value="8,234"
-              trend="65.6% accuracy rate"
+              value={stats.loading ? "..." : stats.verifiedTrue.toLocaleString()}
+              trend={
+                stats.totalVerifications > 0
+                  ? `${Math.round((stats.verifiedTrue / stats.totalVerifications) * 100)}% of total`
+                  : "Start verifying content"
+              }
               icon={CheckCircle}
               iconColor="from-green-500 to-green-600"
             />
             <StatsCard
               title="Detected Fake"
-              value="3,127"
-              trend="24.9% of total"
+              value={stats.loading ? "..." : stats.detectedFake.toLocaleString()}
+              trend={
+                stats.totalVerifications > 0
+                  ? `${Math.round((stats.detectedFake / stats.totalVerifications) * 100)}% of total`
+                  : "Track misinformation"
+              }
               icon={XCircle}
               iconColor="from-red-500 to-red-600"
             />
             <StatsCard
               title="Trending Topics"
-              value="42"
-              trend="8 new today"
+              value={stats.loading ? "..." : stats.trendingTopics.toLocaleString()}
+              trend={
+                stats.trendingTopics > 0
+                  ? `${stats.trendingTopics} active topic${stats.trendingTopics !== 1 ? "s" : ""}`
+                  : "No trending topics"
+              }
               icon={TrendingUp}
               iconColor="from-purple-500 to-purple-600"
             />
