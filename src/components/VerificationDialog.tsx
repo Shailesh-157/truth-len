@@ -213,9 +213,16 @@ export function VerificationDialog({
                 {sources.map((source: string, index: number) => (
                   <li
                     key={index}
-                    className="text-xs sm:text-sm text-primary hover:underline cursor-pointer break-words"
+                    className="text-xs sm:text-sm break-words"
                   >
-                    {source}
+                    <a 
+                      href={source} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline cursor-pointer"
+                    >
+                      {source}
+                    </a>
                   </li>
                 ))}
               </ul>
