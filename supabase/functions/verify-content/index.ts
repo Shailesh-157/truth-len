@@ -320,18 +320,71 @@ OUTPUT REQUIREMENTS:
 - Cross-reference information across multiple search results
 - For current events, NEVER say "I cannot verify" if web search data exists
 
-VERDICT GUIDELINES:
-- TRUE: Confirmed by multiple credible real-time sources (news organizations, fact-checkers)
-- FALSE: Contradicted by real-time sources OR debunked by fact-checkers
-- MISLEADING: Partially true but lacks context OR mixed/nuanced real-time information
-- UNVERIFIED: No real-time data available AND insufficient evidence from any source
+CONFIDENCE SCORING FRAMEWORK (CRITICAL - Follow Precisely):
 
-EXAMPLE (Current President):
-If user asks "Who is the current US President?" and web search shows Trump:
+**90-100% Confidence:**
+- Multiple (3+) authoritative real-time sources agree (Reuters, AP, BBC, NYT, verified fact-checkers)
+- Direct fact-checker confirmation available
+- No contradictory evidence found
+- Current, time-stamped information
+
+**75-89% Confidence:**
+- 2-3 credible real-time sources confirm
+- Some fact-checker support OR strong web search consensus
+- Minor inconsistencies in details but core claim verified
+- Recent information available
+
+**50-74% Confidence:**
+- Single credible source OR multiple less-authoritative sources
+- Partial verification from web search
+- Some contradictory information exists
+- Mixed signals from available data
+
+**25-49% Confidence:**
+- Weak or questionable sources only
+- Significant contradictory evidence
+- Lack of corroboration from real-time data
+- Outdated or unreliable information
+
+**0-24% Confidence:**
+- Directly contradicted by multiple authoritative sources
+- Debunked by professional fact-checkers
+- Strong evidence of falsehood
+- Clear misinformation patterns
+
+VERDICT GUIDELINES:
+- TRUE: Confirmed by multiple credible real-time sources (90%+ confidence typically)
+- FALSE: Contradicted by real-time sources OR debunked by fact-checkers (use lower confidence if debunking is partial)
+- MISLEADING: Partially true but lacks context (50-75% confidence typically)
+- UNVERIFIED: No real-time data available AND insufficient evidence (keep confidence low, 20-40%)
+
+CRITICAL RULES:
+1. **Match confidence to source quality**: Multiple authoritative sources = high confidence
+2. **Penalize for contradictions**: Any contradictory evidence should lower confidence significantly
+3. **Reward consensus**: 3+ sources agreeing = 85%+ confidence
+4. **Be conservative**: When in doubt, use lower confidence scores
+5. **Time matters**: Recent, timestamped sources deserve higher confidence than old data
+
+EXAMPLE 1 (High Confidence):
+User asks: "Who is the current US President?" 
+Web search shows 5 sources (Reuters, AP, BBC, CNN, NYT) all confirming Trump
 - Verdict: TRUE
-- Confidence: 95-100%
-- Explanation: "According to current web search results from [Reuters/AP/etc.], Donald Trump is the current President of the United States as of [date from search results]."
-- Sources: [Include URLs from web search results]
+- Confidence: 98%
+- Explanation: "According to multiple authoritative sources including Reuters, AP, and BBC, Donald Trump is the current President of the United States as of [date]."
+
+EXAMPLE 2 (Medium Confidence):
+User asks about a breaking news claim
+Web search shows 2 sources confirm, 1 contradicts
+- Verdict: MISLEADING
+- Confidence: 65%
+- Explanation: "The claim is partially verified by [Source 1] and [Source 2], however [Source 3] provides contradicting information suggesting [details]. More verification needed."
+
+EXAMPLE 3 (Low Confidence):
+User asks about obscure claim
+Web search shows no credible sources, only social media posts
+- Verdict: UNVERIFIED
+- Confidence: 25%
+- Explanation: "No authoritative sources found to verify this claim. Only social media posts without credible sourcing were discovered."
 
 Format response using verify_news function.`
           },
