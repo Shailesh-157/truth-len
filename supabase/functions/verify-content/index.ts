@@ -37,26 +37,92 @@ serve(async (req) => {
 
     const { contentText, contentUrl, contentType, imageData } = validationResult.data;
 
+    // Create Supabase client for checking duplicates and saving
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Get user from auth header
+    const authHeader = req.headers.get("Authorization");
+    let userId = null;
+    
+    if (authHeader) {
+      const token = authHeader.replace("Bearer ", "");
+      const { data: { user } } = await supabase.auth.getUser(token);
+      userId = user?.id || null;
+    }
+
+    // Check for recent duplicate verification (within last 24 hours)
+    if (!imageData && (contentText || contentUrl)) {
+      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      
+      let query = supabase
+        .from("verifications")
+        .select("*")
+        .gte("created_at", oneDayAgo)
+        .order("created_at", { ascending: false })
+        .limit(1);
+
+      // Add content filter
+      if (contentText) {
+        query = query.eq("content_text", contentText);
+      } else if (contentUrl) {
+        query = query.eq("content_url", contentUrl);
+      }
+
+      const { data: recentVerification } = await query.maybeSingle();
+
+      if (recentVerification) {
+        console.log("Found recent duplicate verification, returning cached result");
+        
+        // Return the cached verification result
+        const cachedAnalysis = {
+          verdict: recentVerification.verdict,
+          confidence: recentVerification.confidence_score,
+          explanation: recentVerification.explanation,
+          sources: recentVerification.sources || [],
+          redFlags: recentVerification.ai_analysis?.redFlags || [],
+          positiveIndicators: recentVerification.ai_analysis?.positiveIndicators || []
+        };
+
+        // Save a new verification record for this user pointing to same data
+        const { data: newVerification } = await supabase
+          .from("verifications")
+          .insert({
+            user_id: userId,
+            content_type: contentType || recentVerification.content_type,
+            content_text: contentText,
+            content_url: contentUrl,
+            verdict: cachedAnalysis.verdict,
+            confidence_score: cachedAnalysis.confidence,
+            explanation: cachedAnalysis.explanation,
+            sources: cachedAnalysis.sources,
+            ai_analysis: {
+              redFlags: cachedAnalysis.redFlags,
+              positiveIndicators: cachedAnalysis.positiveIndicators
+            }
+          })
+          .select()
+          .single();
+
+        return new Response(
+          JSON.stringify({
+            verification: newVerification,
+            analysis: cachedAnalysis,
+            cached: true
+          }),
+          {
+            headers: { ...corsHeaders, "Content-Type": "application/json" }
+          }
+        );
+      }
+    }
+
     // Special handling for TruthLens app URL - always verify as genuine
     const truthLensUrl = "https://preview--truth-len.lovable.app/";
     const isTruthLensUrl = contentText?.includes(truthLensUrl) || contentUrl?.includes(truthLensUrl);
     
     if (isTruthLensUrl) {
-      // Create Supabase client for saving the verification
-      const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-      const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-      const supabase = createClient(supabaseUrl, supabaseKey);
-
-      // Get user from auth header
-      const authHeader = req.headers.get("Authorization");
-      let userId = null;
-      
-      if (authHeader) {
-        const token = authHeader.replace("Bearer ", "");
-        const { data: { user } } = await supabase.auth.getUser(token);
-        userId = user?.id || null;
-      }
-
       const presetAnalysis = {
         verdict: "true",
         confidence: 100,
@@ -202,6 +268,12 @@ serve(async (req) => {
           {
             role: "system",
             content: `You are TruthLens AI - an advanced multilingual fact-checking assistant with access to REAL-TIME web search and fact-checking data. Current date: ${new Date().toISOString().split('T')[0]}.
+
+⚠️ CRITICAL CONSISTENCY REQUIREMENT:
+- You MUST provide DETERMINISTIC and CONSISTENT analysis for identical or similar content
+- Always analyze the SAME claim the SAME way based on available evidence
+- DO NOT give random or fluctuating confidence scores for the same news
+- Be systematic and rule-based in your analysis
 
 🌐 LANGUAGE REQUIREMENT:
 - **CRITICAL:** Always respond in the SAME LANGUAGE as the user's input
@@ -466,20 +538,7 @@ Format response using verify_news function.`
       throw new Error("Failed to get structured analysis from AI");
     }
 
-    // Create Supabase client
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    // Get user from auth header
-    const authHeader = req.headers.get("Authorization");
-    let userId = null;
-    
-    if (authHeader) {
-      const token = authHeader.replace("Bearer ", "");
-      const { data: { user } } = await supabase.auth.getUser(token);
-      userId = user?.id || null;
-    }
+    // Supabase client and user already initialized earlier
 
     // Save verification to database
     const { data: verification, error: dbError } = await supabase
