@@ -262,6 +262,8 @@ serve(async (req) => {
     let messageContent: any[];
     
     if (imageData) {
+      console.log("Processing image verification, image data length:", imageData.length);
+      
       // For image analysis with comprehensive forensic prompt
       const imageAnalysisPrompt = contentText || `Perform a comprehensive forensic analysis of this image to verify its authenticity:
 
@@ -274,8 +276,8 @@ serve(async (req) => {
 
 Provide a detailed verdict on whether this image is AUTHENTIC, MANIPULATED, AI-GENERATED, or needs further verification.`;
 
-      // Ensure the image data has the correct format
-      const imageUrl = imageData.startsWith('data:') ? imageData : `data:image/jpeg;base64,${imageData}`;
+      // The image data from frontend already includes the data URL prefix
+      console.log("Image data starts with:", imageData.substring(0, 50));
       
       messageContent = [
         {
@@ -285,7 +287,7 @@ Provide a detailed verdict on whether this image is AUTHENTIC, MANIPULATED, AI-G
         {
           type: "image_url",
           image_url: {
-            url: imageUrl
+            url: imageData // Use the image data directly as it already has the data:image prefix
           }
         }
       ];
@@ -581,6 +583,9 @@ Format response using verify_news function.`
     });
 
     if (!aiResponse.ok) {
+      const errorText = await aiResponse.text();
+      console.error("AI gateway error - Status:", aiResponse.status, "Response:", errorText);
+      
       if (aiResponse.status === 429) {
         return new Response(
           JSON.stringify({ error: "Rate limits exceeded, please try again later." }),
@@ -593,8 +598,8 @@ Format response using verify_news function.`
           { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      console.error("AI gateway returned error status");
-      throw new Error("AI verification service unavailable");
+      
+      throw new Error(`AI verification service error: ${errorText}`);
     }
 
     const aiData = await aiResponse.json();
