@@ -109,8 +109,29 @@ serve(async (req) => {
     }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    const GOOGLE_FACT_CHECK_API_KEY = Deno.env.get("GOOGLE_FACT_CHECK_API_KEY");
+    
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
+    }
+
+    // Fetch real-time fact-checks from Google Fact Check API
+    let factCheckResults = [];
+    if (GOOGLE_FACT_CHECK_API_KEY && (contentText || contentUrl)) {
+      try {
+        const query = contentText || contentUrl || "";
+        const factCheckResponse = await fetch(
+          `https://factchecktools.googleapis.com/v1alpha1/claims:search?query=${encodeURIComponent(query)}&key=${GOOGLE_FACT_CHECK_API_KEY}`
+        );
+        
+        if (factCheckResponse.ok) {
+          const factCheckData = await factCheckResponse.json();
+          factCheckResults = factCheckData.claims || [];
+          console.log(`Found ${factCheckResults.length} fact-check results`);
+        }
+      } catch (error) {
+        console.error("Fact check API error:", error);
+      }
     }
 
     // Prepare the message content for AI analysis
@@ -154,36 +175,67 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `You are TruthLens AI - an advanced fact-checking assistant. Current date: ${new Date().toISOString().split('T')[0]}.
+            content: `You are TruthLens AI - an advanced fact-checking assistant with access to real-time fact-checking data. Current date: ${new Date().toISOString().split('T')[0]}.
 
-⚠️ CRITICAL LIMITATIONS AWARENESS:
-- You do NOT have real-time internet access
+🔍 ENHANCED CAPABILITIES:
+- You have access to verified fact-check results from Google Fact Check Tools API
+- Cross-reference claims with professional fact-checkers (Snopes, PolitiFact, FactCheck.org, etc.)
+- Utilize real-time verification data when available
+- Combine AI analysis with verified fact-check sources for maximum accuracy
+
+${factCheckResults.length > 0 ? `
+📊 FACT-CHECK DATA AVAILABLE:
+You have ${factCheckResults.length} verified fact-check(s) for this claim. Here's the data:
+${JSON.stringify(factCheckResults.slice(0, 3).map((claim: any) => ({
+  text: claim.text,
+  claimant: claim.claimant,
+  claimDate: claim.claimDate,
+  claimReview: claim.claimReview?.map((review: any) => ({
+    publisher: review.publisher?.name,
+    url: review.url,
+    title: review.title,
+    rating: review.textualRating,
+    reviewDate: review.reviewDate
+  }))
+})), null, 2)}
+
+CRITICAL: Use this verified data as your PRIMARY source. Give it the highest weight in your analysis.
+` : ''}
+
+⚠️ LIMITATIONS (when fact-check data unavailable):
+- Limited real-time internet access for some sources
 - Your training data has a knowledge cutoff date
-- For current events, political positions, breaking news, or recent appointments - you MUST acknowledge uncertainty
-- For time-sensitive claims (government positions, current office holders, recent events), use verdict "UNVERIFIED" and recommend checking official sources
+- For current events without fact-check data, acknowledge uncertainty appropriately
 
 YOUR CAPABILITIES:
-1. Historical fact verification (events before your knowledge cutoff)
+1. ✅ Real-time verified fact-check integration (PRIMARY SOURCE)
 2. Deep image forensics and manipulation detection  
-3. AI tool/app legitimacy assessment (based on general patterns)
+3. AI tool/app legitimacy assessment
 4. Logical consistency analysis
 5. Misinformation pattern recognition
-6. Source credibility evaluation (general reputation)
+6. Cross-referencing with professional fact-checkers
+7. Source credibility evaluation with real-time data
 
 ANALYSIS FRAMEWORK:
 
 📰 FOR NEWS & CLAIMS:
-**For Current Events/Political Positions:**
-- If claim involves "current CM/PM/President/Minister" or recent appointments → Verdict: UNVERIFIED
-- Explanation must state: "I cannot verify current political positions without real-time data. Please check official government websites."
-- Red Flag: "Information may be outdated due to AI knowledge cutoff"
-- Provide sources: Official government website URLs for verification
+**PRIORITY 1 - Use Fact-Check Data (if available):**
+- If verified fact-check results are provided above, use them as PRIMARY evidence
+- Match the claim against fact-checker ratings (True, False, Misleading, etc.)
+- Include fact-checker source URLs in your sources array
+- Align your verdict with professional fact-checker consensus
+- High confidence scores (85-100%) when multiple fact-checkers agree
 
-**For Historical Facts:**
-- Verify against well-established historical records
-- Check multiple credible sources (Reuters, AP, BBC, verified fact-checkers)
+**PRIORITY 2 - For Current Events (no fact-check data):**
+- If claim involves recent events or political positions → Check if fact-check data exists
+- Without fact-check data: Use verdict "UNVERIFIED" for time-sensitive claims
+- Recommend checking official sources and fact-checking websites
+- Lower confidence scores (40-60%) when relying solely on patterns
+
+**For All Claims:**
 - Identify sensationalism, clickbait, or misleading headlines
-- Assess author credibility and publication reputation
+- Assess source credibility and publication reputation
+- Cross-reference multiple angles and perspectives
 
 🖼️ FOR IMAGES:
 - Detect AI-generated content (Midjourney, DALL-E, Stable Diffusion artifacts)
@@ -212,18 +264,19 @@ Then analyze:
 - Note: Cannot access the actual website content or verify current status
 
 OUTPUT REQUIREMENTS:
-- Be HONEST about limitations
-- For current events: Use "UNVERIFIED" verdict with explanation about knowledge cutoff
-- Confidence score reflects certainty given limitations
-- Specific red flags with clear reasoning
-- Recommend official sources for verification when applicable
-- Never claim to have checked something you cannot access
+- **PRIORITIZE fact-check data** when available - it's verified by professionals
+- Include fact-checker URLs in sources array when using their data
+- Be HONEST about data sources (fact-check API vs. AI inference)
+- High confidence (85-100%) with fact-check consensus, lower (40-70%) without
+- Specific red flags with clear reasoning and evidence
+- Cross-reference multiple fact-checkers when available
+- Transparent about which sources informed your verdict
 
 VERDICT GUIDELINES:
-- TRUE: Verified historical facts or patterns clearly matching known truth
-- FALSE: Proven false based on established facts (be cautious with recent claims)
-- MISLEADING: Partial truths, out of context, or manipulated information
-- UNVERIFIED: Insufficient data, beyond knowledge cutoff, or requires real-time verification
+- TRUE: Verified by multiple fact-checkers OR well-established historical facts
+- FALSE: Debunked by fact-checkers OR proven false by multiple credible sources
+- MISLEADING: Mixed ratings from fact-checkers OR partial truths taken out of context
+- UNVERIFIED: No fact-check data AND insufficient evidence for confident determination
 
 Format response using verify_news function.`
           },
