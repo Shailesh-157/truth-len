@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -17,11 +18,17 @@ serve(async (req) => {
     const inputSchema = z.object({
       contentText: z.string().max(5000).optional(),
       contentUrl: z.string().url().max(2000).optional(),
-      contentType: z.enum(['text', 'url', 'image']).optional(),
-      imageData: z.string().optional()
+      contentType: z.enum(['text', 'url', 'image', 'audio', 'video']).optional(),
+      imageData: z.string().optional(),
+      audioData: z.string().optional(),
+      videoMetadata: z.object({
+        fileName: z.string(),
+        fileSize: z.number(),
+        fileType: z.string(),
+      }).optional(),
     }).refine(
-      data => data.contentText || data.contentUrl || data.imageData,
-      { message: 'At least one content field (contentText, contentUrl, or imageData) is required' }
+      data => data.contentText || data.contentUrl || data.imageData || data.audioData || data.videoMetadata,
+      { message: 'At least one content field is required' }
     );
 
     // Parse and validate input
@@ -35,7 +42,48 @@ serve(async (req) => {
       );
     }
 
-    const { contentText, contentUrl, contentType, imageData } = validationResult.data;
+    const { contentText, contentUrl, contentType, imageData, audioData, videoMetadata } = validationResult.data;
+
+    // Function to transcribe audio using OpenAI Whisper
+    const transcribeAudio = async (audioBase64: string): Promise<string> => {
+      const openAIKey = Deno.env.get("OPENAI_API_KEY");
+      if (!openAIKey) {
+        throw new Error("OpenAI API key not configured. Please add OPENAI_API_KEY to your secrets.");
+      }
+
+      console.log("Starting audio transcription...");
+
+      // Convert base64 to binary
+      const binaryString = atob(audioBase64);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+
+      // Create form data
+      const formData = new FormData();
+      const blob = new Blob([bytes], { type: 'audio/webm' });
+      formData.append('file', blob, 'audio.webm');
+      formData.append('model', 'whisper-1');
+
+      const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openAIKey}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("OpenAI Whisper error:", errorText);
+        throw new Error(`Failed to transcribe audio: ${response.status} ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log("Transcription successful:", result.text.substring(0, 100) + "...");
+      return result.text;
+    };
 
     // Create Supabase client for checking duplicates and saving
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -52,8 +100,33 @@ serve(async (req) => {
       userId = user?.id || null;
     }
 
+    // Handle audio transcription if audio data is provided
+    let transcribedText = "";
+    if (audioData) {
+      console.log("Audio data detected, starting transcription...");
+      try {
+        transcribedText = await transcribeAudio(audioData);
+        console.log("Audio transcribed successfully");
+      } catch (error) {
+        console.error("Transcription error:", error);
+        throw new Error("Failed to transcribe audio. Please ensure OPENAI_API_KEY is configured.");
+      }
+    }
+
+    // Handle video analysis
+    let videoAnalysisContext = "";
+    if (videoMetadata && contentUrl) {
+      videoAnalysisContext = `Video File: ${videoMetadata.fileName}
+Size: ${(videoMetadata.fileSize / 1024 / 1024).toFixed(2)} MB
+Type: ${videoMetadata.fileType}
+URL: ${contentUrl}
+
+This is a video file that needs to be analyzed for authenticity and credibility.`;
+      console.log("Video metadata:", videoMetadata);
+    }
+
     // Check for recent duplicate verification (within last 24 hours)
-    if (!imageData && (contentText || contentUrl)) {
+    if (!imageData && !audioData && !videoMetadata && (contentText || contentUrl)) {
       const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
       
       let query = supabase
@@ -291,6 +364,46 @@ Provide a detailed verdict on whether this image is AUTHENTIC, MANIPULATED, AI-G
           }
         }
       ];
+    } else if (transcribedText) {
+      // For audio analysis
+      const audioAnalysisPrompt = `Analyze this transcribed audio content for credibility and fact-check all claims:
+
+**Transcribed Audio:**
+${transcribedText}
+
+**User's Additional Context:** ${contentText || 'None provided'}
+
+Verify ALL factual claims in this audio transcript against real-time web search and fact-check data. Pay attention to:
+1. The credibility of statements made
+2. Whether claims can be verified
+3. Context and potential manipulation through selective editing
+4. Speaker's credibility if identifiable`;
+
+      messageContent = [{
+        type: "text",
+        text: audioAnalysisPrompt
+      }];
+    } else if (videoAnalysisContext) {
+      // For video analysis
+      const videoAnalysisPrompt = `Analyze this video for credibility and authenticity:
+
+${videoAnalysisContext}
+
+**User's Additional Context:** ${contentText || 'None provided'}
+
+Note: This is a video file. Analyze based on:
+1. Video metadata (file size, type, name patterns)
+2. Any suspicious elements in the file properties
+3. Contextual information provided by the user
+4. Whether the source appears credible
+5. Check against web search results for similar content or claims
+
+Provide a verdict on the video's likely authenticity and credibility.`;
+
+      messageContent = [{
+        type: "text",
+        text: videoAnalysisPrompt
+      }];
     } else {
       // For text/URL analysis with enhanced context
       let analysisPrompt = "";
