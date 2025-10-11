@@ -259,7 +259,19 @@ export function QuickVerify({ onVerificationComplete, onAuthRequired }: QuickVer
       toast.success("Verification complete!");
     } catch (error: any) {
       console.error("Verification error:", error);
-      toast.error(error.message || "Failed to verify content");
+      
+      // Show user-friendly error messages
+      if (error.message?.includes("transcription") || error.message?.includes("audio")) {
+        toast.error("Audio verification is temporarily unavailable. Please describe the audio content as text in the Text/URL tab.", {
+          duration: 6000,
+        });
+      } else if (error.message?.includes("quota") || error.message?.includes("exceeded")) {
+        toast.error("Service limit reached. Please try again later or contact support.", {
+          duration: 5000,
+        });
+      } else {
+        toast.error(error.message || "Failed to verify content");
+      }
     } finally {
       setIsVerifying(false);
     }
