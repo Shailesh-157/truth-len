@@ -580,17 +580,26 @@ EXAMPLES:
 
 📊 FactCheck API Example:
 FactCheck: Snopes rates "False", PolitiFact says "Pants on Fire"
-→ Verdict: FALSE, Confidence: 10%, Sources: [Snopes URL, PolitiFact URL]
+→ Verdict: FALSE, Confidence: 10%, Sources: ["https://www.snopes.com/...", "https://www.politifact.com/..."]
 
 ✅ TRUE Example (No FactCheck):
 Search: Reuters + BBC + NYT + The Hindu confirm "Election results"
-→ Verdict: TRUE, Confidence: 95%, Sources: [Reuters URL, BBC URL, NYT URL]
+→ Verdict: TRUE, Confidence: 95%, Sources: ["https://www.reuters.com/article/...", "https://www.bbc.com/news/...", "https://www.nytimes.com/..."]
 
 ❌ FALSE Example (No FactCheck):
 Search: AFP debunks, Snopes says false, no credible sources support
-→ Verdict: FALSE, Confidence: 15%
+→ Verdict: FALSE, Confidence: 15%, Sources: ["https://factcheck.afp.com/...", "https://www.snopes.com/..."]
 
-Format using verify_news function. ALWAYS include source URLs.`
+🔗 CRITICAL - SOURCES ARRAY RULES:
+1. ONLY include FULL URLs (must start with http:// or https://)
+2. Extract URLs from FactCheck API results (review.url field) and Web Search results (link field)
+3. DO NOT include source names without URLs
+4. Each source must be a clickable link
+5. Prefer FactCheck URLs, then major news URLs
+6. Example: ["https://www.reuters.com/world/...", "https://www.bbc.com/news/..."]
+7. DO NOT use generic text like "Reuters", "BBC" - ONLY full URLs
+
+Format using verify_news function.`
           },
           {
             role: "user",
@@ -605,7 +614,7 @@ Format using verify_news function. ALWAYS include source URLs.`
               description: "Verify news content and provide structured analysis",
               parameters: {
                 type: "object",
-                properties: {
+                 properties: {
                   verdict: {
                     type: "string",
                     enum: ["true", "false", "misleading", "unverified"]
@@ -620,7 +629,8 @@ Format using verify_news function. ALWAYS include source URLs.`
                   },
                   sources: {
                     type: "array",
-                    items: { type: "string" }
+                    items: { type: "string" },
+                    description: "Array of FULL URLs only (must start with http:// or https://). Example: ['https://www.reuters.com/article/...', 'https://www.bbc.com/news/...']"
                   },
                   redFlags: {
                     type: "array",
