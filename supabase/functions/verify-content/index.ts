@@ -268,22 +268,36 @@ This is a video file that needs to be analyzed for authenticity and credibility.
     }
 
     // Fetch real-time fact-checks from Google Fact Check API
-    let factCheckResults = [];
+    let factCheckResults: any[] = [];
     if (GOOGLE_FACT_CHECK_API_KEY && (contentText || contentUrl)) {
       try {
         const query = contentText || contentUrl || "";
+        console.log(`🔍 Querying Google FactCheck API for: "${query.substring(0, 100)}..."`);
+        
         const factCheckResponse = await fetch(
-          `https://factchecktools.googleapis.com/v1alpha1/claims:search?query=${encodeURIComponent(query)}&key=${GOOGLE_FACT_CHECK_API_KEY}`
+          `https://factchecktools.googleapis.com/v1alpha1/claims:search?query=${encodeURIComponent(query)}&key=${GOOGLE_FACT_CHECK_API_KEY}&languageCode=en`
         );
         
         if (factCheckResponse.ok) {
           const factCheckData = await factCheckResponse.json();
           factCheckResults = factCheckData.claims || [];
-          console.log(`Found ${factCheckResults.length} fact-check results`);
+          console.log(`✓ Google FactCheck found ${factCheckResults.length} verified claims`);
+          
+          if (factCheckResults.length > 0) {
+            console.log("Sample fact-check results:", JSON.stringify(factCheckResults.slice(0, 2).map((claim: any) => ({
+              claim: claim.text?.substring(0, 100),
+              publisher: claim.claimReview?.[0]?.publisher?.name,
+              rating: claim.claimReview?.[0]?.textualRating
+            })), null, 2));
+          }
+        } else {
+          console.error(`❌ Google FactCheck API error: ${factCheckResponse.status}`);
         }
       } catch (error) {
-        console.error("Fact check API error:", error);
+        console.error("❌ Fact check API error:", error);
       }
+    } else {
+      console.warn("⚠️ Google FactCheck API not configured - fact-checking accuracy limited");
     }
 
     // Fetch URL content if URL is provided
@@ -468,81 +482,115 @@ Cross-reference with web search results and fact-checker databases. Verify ALL f
         messages: [
           {
             role: "system",
-            content: `You are TruthLens AI - Elite Fact-Checker with REAL-TIME web search. Date: ${new Date().toISOString().split('T')[0]}.
+            content: `You are TruthLens AI - Elite Fact-Checker with REAL-TIME Google FactCheck Tools API integration. Date: ${new Date().toISOString().split('T')[0]}.
 
 🚨 CRITICAL ACCURACY RULES - FOLLOW EXACTLY:
 
-1. **DEFAULT TO TRUE for credible sources**
-   - Reuters, AP, BBC, NYT, CNN, Guardian, WSJ = Trusted sources
+1. **PRIORITIZE GOOGLE FACTCHECK API DATA**
+   - Google FactCheck API = HIGHEST authority source
+   - If FactCheck API has verdict → Use it as PRIMARY evidence
+   - FactCheck publishers (Snopes, PolitiFact, AFP, Reuters) = Most reliable
+
+2. **DEFAULT TO TRUE for credible sources**
+   - Reuters, AP, BBC, NYT, CNN, Guardian, WSJ, The Hindu = Trusted sources
    - If 2+ major outlets confirm → Mark TRUE with 90%+ confidence
    - Real news is usually TRUE, not false
 
-2. **REQUIRE PROOF for FALSE verdict**
-   - Only FALSE when contradicted by authoritative sources
-   - Do NOT mark FALSE because you're unsure
+3. **REQUIRE STRONG PROOF for FALSE verdict**
+   - Only FALSE when:
+     a) Google FactCheck API debunks it, OR
+     b) Multiple authoritative sources contradict it
+   - Do NOT mark FALSE just because you're unsure
    - No evidence ≠ Evidence of falsehood
 
-3. **TRUST WEB SEARCH RESULTS**
-   - Web search = PRIMARY source of truth
-   - Multiple credible sources in search = TRUE verdict
-   - Use search data over your training knowledge
+4. **TRUST DATA HIERARCHY**
+   1st: Google FactCheck API results
+   2nd: Web search from major news outlets
+   3rd: Content analysis
+   - NEVER contradict FactCheck API without extreme evidence
 
 🌐 LANGUAGE: Respond in user's language (Hindi → Hindi, English → English)
 
+${factCheckResults.length > 0 ? `
+📊 **GOOGLE FACTCHECK API RESULTS (${factCheckResults.length} claims found):**
+
+${JSON.stringify(factCheckResults.slice(0, 5).map((claim: any) => ({
+  claim: claim.text,
+  claimant: claim.claimant,
+  claimDate: claim.claimDate,
+  reviews: claim.claimReview?.map((review: any) => ({
+    publisher: review.publisher?.name,
+    url: review.url,
+    title: review.title,
+    rating: review.textualRating,
+    languageCode: review.languageCode
+  }))
+})), null, 2)}
+
+🔴 CRITICAL: These are VERIFIED fact-checks from trusted organizations
+- If rating is "True"/"Verified"/"Correct" → Mark TRUE with 95%+ confidence
+- If rating is "False"/"Debunked"/"Pants on Fire" → Mark FALSE with 5-15% confidence
+- INCLUDE fact-checker URLs in your "sources" array
+- RESPECT these verdicts - they are from professional fact-checkers
+` : '⚠️ NO GOOGLE FACTCHECK DATA - Using other sources'}
+
 ${webSearchResults.length > 0 ? `
-🌐 **YOU HAVE ${webSearchResults.length} REAL-TIME WEB SEARCH RESULTS:**
+🌐 **WEB SEARCH RESULTS (${webSearchResults.length} found):**
 
 ${JSON.stringify(webSearchResults, null, 2)}
 
-⚠️ CRITICAL: Use these as PRIMARY evidence
-- If 2+ credible sources (Reuters, AP, BBC, NYT) confirm → TRUE with 90%+ confidence
+⚠️ Use these as SECONDARY evidence (after FactCheck API):
+- If 2+ credible sources (Reuters, AP, BBC, NYT) confirm → Strong indicator
 - Include source URLs in your "sources" array
-- DO NOT ignore this data
-` : '⚠️ NO WEB SEARCH DATA - Accuracy limited'}
-
-${factCheckResults.length > 0 ? `
-📊 FACT-CHECK DATA (${factCheckResults.length} results):
-${JSON.stringify(factCheckResults.slice(0, 3).map((claim: any) => ({
-  text: claim.text,
-  claimReview: claim.claimReview?.map((review: any) => ({
-    publisher: review.publisher?.name,
-    rating: review.textualRating
-  }))
-})), null, 2)}
-` : ''}
+- Cross-reference with FactCheck API data
+` : '⚠️ NO WEB SEARCH DATA'}
 
 
-VERDICT RULES (Use these exactly):
+VERDICT RULES (Follow this hierarchy):
 
-✅ **TRUE** (90-100% confidence):
-- 2+ credible sources in web search confirm
-- Fact-checkers verify as true
-- Strong consensus from established outlets
+📊 **PRIORITY 1: Google FactCheck API**
+If FactCheck API has results:
+- Rating "True"/"Verified" → TRUE (90-100% confidence)
+- Rating "False"/"Debunked" → FALSE (5-15% confidence)
+- Rating "Misleading"/"Mixture" → MISLEADING (50-70% confidence)
 
-❌ **FALSE** (0-30% confidence):
-- Authoritative sources contradict
-- Fact-checkers debunk
-- Clear evidence of fabrication
+🌐 **PRIORITY 2: Web Search Consensus**
+If no FactCheck data:
+✅ **TRUE** (85-95% confidence):
+- 3+ major outlets (Reuters, AP, BBC, NYT, CNN) confirm
+- Strong evidence from reputable sources
+- Verified by established media
+
+❌ **FALSE** (5-20% confidence):
+- Multiple authoritative sources debunk
+- Clear contradicting evidence
+- Proven fabrication
 
 ⚠️ **MISLEADING** (50-75% confidence):
-- Partially true, missing context
+- Partially true but missing context
 - Mixed true/false elements
+- Exaggerated but has some truth
 
-❓ **UNVERIFIED** (20-40% confidence):
-- No credible sources found
-- Insufficient evidence
+❓ **UNVERIFIED** (30-45% confidence):
+- Insufficient credible sources
+- Cannot confirm or deny
+- Needs more evidence
 
 EXAMPLES:
 
-✅ TRUE Example:
-Search: Reuters + BBC + NYT say "Policy announced"
-→ Verdict: TRUE, Confidence: 95%
+📊 FactCheck API Example:
+FactCheck: Snopes rates "False", PolitiFact says "Pants on Fire"
+→ Verdict: FALSE, Confidence: 10%, Sources: [Snopes URL, PolitiFact URL]
 
-❌ FALSE Example:
-Search: Snopes + FactCheck.org + AP debunk claim
-→ Verdict: FALSE, Confidence: 10%
+✅ TRUE Example (No FactCheck):
+Search: Reuters + BBC + NYT + The Hindu confirm "Election results"
+→ Verdict: TRUE, Confidence: 95%, Sources: [Reuters URL, BBC URL, NYT URL]
 
-Format using verify_news function.`
+❌ FALSE Example (No FactCheck):
+Search: AFP debunks, Snopes says false, no credible sources support
+→ Verdict: FALSE, Confidence: 15%
+
+Format using verify_news function. ALWAYS include source URLs.`
           },
           {
             role: "user",
