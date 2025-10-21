@@ -273,10 +273,11 @@ This is a video file that needs to be analyzed for authenticity and credibility.
       try {
         const query = contentText || contentUrl || "";
         console.log(`🔍 Querying Google FactCheck API for: "${query.substring(0, 100)}..."`);
+        console.log(`API Key present: ${GOOGLE_FACT_CHECK_API_KEY ? 'Yes' : 'No'}`);
         
-        const factCheckResponse = await fetch(
-          `https://factchecktools.googleapis.com/v1alpha1/claims:search?query=${encodeURIComponent(query)}&key=${GOOGLE_FACT_CHECK_API_KEY}&languageCode=en`
-        );
+        const factCheckUrl = `https://factchecktools.googleapis.com/v1alpha1/claims:search?query=${encodeURIComponent(query)}&key=${GOOGLE_FACT_CHECK_API_KEY}&languageCode=en`;
+        
+        const factCheckResponse = await fetch(factCheckUrl);
         
         if (factCheckResponse.ok) {
           const factCheckData = await factCheckResponse.json();
@@ -291,7 +292,9 @@ This is a video file that needs to be analyzed for authenticity and credibility.
             })), null, 2));
           }
         } else {
-          console.error(`❌ Google FactCheck API error: ${factCheckResponse.status}`);
+          const errorText = await factCheckResponse.text();
+          console.error(`❌ Google FactCheck API error: ${factCheckResponse.status} - ${errorText}`);
+          console.error(`Error details: The API key may be invalid or the Fact Check API may not be enabled in your Google Cloud project`);
         }
       } catch (error) {
         console.error("❌ Fact check API error:", error);
@@ -338,10 +341,11 @@ This is a video file that needs to be analyzed for authenticity and credibility.
       try {
         const searchQuery = contentText || contentUrl || "";
         console.log(`Performing web search for: "${searchQuery.substring(0, 100)}..."`);
+        console.log(`Search API Key present: ${GOOGLE_SEARCH_API_KEY ? 'Yes' : 'No'}, Engine ID: ${GOOGLE_SEARCH_ENGINE_ID ? 'Yes' : 'No'}`);
         
-        const searchResponse = await fetch(
-          `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_SEARCH_API_KEY}&cx=${GOOGLE_SEARCH_ENGINE_ID}&q=${encodeURIComponent(searchQuery)}&num=10`
-        );
+        const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_SEARCH_API_KEY}&cx=${GOOGLE_SEARCH_ENGINE_ID}&q=${encodeURIComponent(searchQuery)}&num=10`;
+        
+        const searchResponse = await fetch(searchUrl);
         
         if (searchResponse.ok) {
           const searchData = await searchResponse.json();
@@ -353,7 +357,9 @@ This is a video file that needs to be analyzed for authenticity and credibility.
           })) || [];
           console.log(`✓ Found ${webSearchResults.length} web search results from sources like: ${webSearchResults.slice(0, 3).map((r: any) => r.source).join(', ')}`);
         } else {
-          console.error('Web search API error:', searchResponse.status);
+          const errorText = await searchResponse.text();
+          console.error(`Web search API error: ${searchResponse.status} - ${errorText}`);
+          console.error(`Error details: Check if Custom Search API is enabled and Search Engine ID is correct`);
         }
       } catch (error) {
         console.error("Web search API error:", error);
