@@ -273,7 +273,6 @@ This is a video file that needs to be analyzed for authenticity and credibility.
       try {
         const query = contentText || contentUrl || "";
         console.log(`🔍 Querying Google FactCheck API for: "${query.substring(0, 100)}..."`);
-        console.log(`API Key present: ${GOOGLE_FACT_CHECK_API_KEY ? 'Yes' : 'No'}`);
         
         const factCheckUrl = `https://factchecktools.googleapis.com/v1alpha1/claims:search?query=${encodeURIComponent(query)}&key=${GOOGLE_FACT_CHECK_API_KEY}&languageCode=en`;
         
@@ -293,14 +292,23 @@ This is a video file that needs to be analyzed for authenticity and credibility.
           }
         } else {
           const errorText = await factCheckResponse.text();
-          console.error(`❌ Google FactCheck API error: ${factCheckResponse.status} - ${errorText}`);
-          console.error(`Error details: The API key may be invalid or the Fact Check API may not be enabled in your Google Cloud project`);
+          console.error(`❌ CRITICAL: Google FactCheck API Failed (${factCheckResponse.status})`);
+          console.error(`📋 Error Response: ${errorText}`);
+          
+          if (factCheckResponse.status === 403) {
+            console.error(`
+🔧 FIX REQUIRED - Enable Fact Check API:
+1. Go to: https://console.cloud.google.com/apis/library/factchecktools.googleapis.com
+2. Click "Enable API"
+3. Wait 2-5 minutes for it to activate
+4. Try verification again`);
+          }
         }
       } catch (error) {
         console.error("❌ Fact check API error:", error);
       }
     } else {
-      console.warn("⚠️ Google FactCheck API not configured - fact-checking accuracy limited");
+      console.warn("⚠️ CRITICAL: Google FactCheck API not configured - verification WILL BE INACCURATE");
     }
 
     // Fetch URL content if URL is provided
@@ -340,8 +348,7 @@ This is a video file that needs to be analyzed for authenticity and credibility.
     if (GOOGLE_SEARCH_API_KEY && GOOGLE_SEARCH_ENGINE_ID && (contentText || contentUrl)) {
       try {
         const searchQuery = contentText || contentUrl || "";
-        console.log(`Performing web search for: "${searchQuery.substring(0, 100)}..."`);
-        console.log(`Search API Key present: ${GOOGLE_SEARCH_API_KEY ? 'Yes' : 'No'}, Engine ID: ${GOOGLE_SEARCH_ENGINE_ID ? 'Yes' : 'No'}`);
+        console.log(`🔍 Performing web search for: "${searchQuery.substring(0, 100)}..."`);
         
         const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_SEARCH_API_KEY}&cx=${GOOGLE_SEARCH_ENGINE_ID}&q=${encodeURIComponent(searchQuery)}&num=10`;
         
@@ -355,17 +362,27 @@ This is a video file that needs to be analyzed for authenticity and credibility.
             link: item.link,
             source: item.displayLink
           })) || [];
-          console.log(`✓ Found ${webSearchResults.length} web search results from sources like: ${webSearchResults.slice(0, 3).map((r: any) => r.source).join(', ')}`);
+          console.log(`✓ Found ${webSearchResults.length} web search results from: ${webSearchResults.slice(0, 3).map((r: any) => r.source).join(', ')}`);
         } else {
           const errorText = await searchResponse.text();
-          console.error(`Web search API error: ${searchResponse.status} - ${errorText}`);
-          console.error(`Error details: Check if Custom Search API is enabled and Search Engine ID is correct`);
+          console.error(`❌ CRITICAL: Google Search API Failed (${searchResponse.status})`);
+          console.error(`📋 Error Response: ${errorText}`);
+          
+          if (searchResponse.status === 400) {
+            console.error(`
+🔧 FIX REQUIRED - Configure Search API:
+1. Go to: https://console.cloud.google.com/apis/library/customsearch.googleapis.com
+2. Click "Enable API"
+3. Create a Custom Search Engine at: https://programmablesearchengine.google.com/
+4. Update GOOGLE_SEARCH_ENGINE_ID secret with your Search Engine ID (format: abc123:def456)
+5. Ensure GOOGLE_SEARCH_API_KEY is valid`);
+          }
         }
       } catch (error) {
-        console.error("Web search API error:", error);
+        console.error("❌ Web search API error:", error);
       }
     } else {
-      console.warn("⚠️ Google Search API not configured - verification accuracy will be limited");
+      console.warn("⚠️ CRITICAL: Google Search API not configured - verification WILL BE INACCURATE");
     }
 
     // Prepare the message content for AI analysis
