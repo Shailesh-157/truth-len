@@ -1,4 +1,5 @@
 import { ThemeToggle } from "./ThemeToggle";
+import { LanguageSelector } from "./LanguageSelector";
 import logo from "@/assets/truthlens-logo.png";
 
 export function Navbar() {
@@ -12,16 +13,17 @@ export function Navbar() {
           </span>
         </div>
         
-        <div className="flex items-center gap-6">
-          <a href="#features" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors">
+        <div className="flex items-center gap-4">
+          <a href="#features" className="hidden sm:block text-sm font-medium text-foreground/80 hover:text-foreground transition-colors">
             Features
           </a>
-          <a href="#how-it-works" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors">
+          <a href="#how-it-works" className="hidden sm:block text-sm font-medium text-foreground/80 hover:text-foreground transition-colors">
             How It Works
           </a>
           <a href="#verify" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors">
             Verify Now
           </a>
+          <LanguageSelector />
           <ThemeToggle />
         </div>
       </div>

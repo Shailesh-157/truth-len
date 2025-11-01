@@ -1,5 +1,6 @@
 import { Bell, Search, LogOut, LogIn, Menu } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
+import { LanguageSelector } from "./LanguageSelector";
 import { Input } from "./ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
@@ -67,6 +68,7 @@ export function DashboardHeader({ onSignInClick, onMenuClick }: DashboardHeaderP
 
       {/* Right Section */}
       <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
+        <LanguageSelector />
         <ThemeToggle />
         
         {user && (

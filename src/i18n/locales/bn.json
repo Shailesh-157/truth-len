@@ -1,0 +1,144 @@
+{
+  "common": {
+    "appName": "ট্রুথলেন্স",
+    "verify": "যাচাই করুন",
+    "verifying": "যাচাই করা হচ্ছে...",
+    "cancel": "বাতিল",
+    "save": "সংরক্ষণ",
+    "delete": "মুছুন",
+    "edit": "সম্পাদনা",
+    "search": "অনুসন্ধান",
+    "loading": "লোড হচ্ছে...",
+    "language": "ভাষা"
+  },
+  "nav": {
+    "dashboard": "ড্যাশবোর্ড",
+    "history": "ইতিহাস",
+    "feedback": "মতামত",
+    "settings": "সেটিংস",
+    "about": "আমাদের সম্পর্কে",
+    "production": "উৎপাদন"
+  },
+  "auth": {
+    "signIn": "সাইন ইন",
+    "signUp": "সাইন আপ",
+    "signOut": "সাইন আউট",
+    "email": "ইমেইল",
+    "password": "পাসওয়ার্ড",
+    "confirmPassword": "পাসওয়ার্ড নিশ্চিত করুন",
+    "displayName": "প্রদর্শন নাম",
+    "forgotPassword": "পাসওয়ার্ড ভুলে গেছেন?",
+    "noAccount": "কোন অ্যাকাউন্ট নেই?",
+    "hasAccount": "ইতিমধ্যে অ্যাকাউন্ট আছে?",
+    "createAccount": "অ্যাকাউন্ট তৈরি করুন",
+    "welcome": "ট্রুথলেন্সে স্বাগতম",
+    "subtitle": "AI-চালিত তথ্য-যাচাইয়ের সাথে সত্য যাচাই করুন"
+  },
+  "dashboard": {
+    "title": "ড্যাশবোর্ড",
+    "quickVerify": "দ্রুত যাচাই",
+    "recentVerifications": "সাম্প্রতিক যাচাইকরণ",
+    "trendingNews": "ট্রেন্ডিং খবর",
+    "stats": {
+      "totalVerifications": "মোট যাচাইকরণ",
+      "accuracy": "নির্ভুলতার হার",
+      "saved": "সংরক্ষিত আইটেম"
+    }
+  },
+  "verify": {
+    "inputPlaceholder": "যাচাই করতে টেক্সট, URL, বা বিষয়বস্তু লিখুন...",
+    "urlPlaceholder": "যাচাই করতে URL লিখুন...",
+    "tabs": {
+      "text": "টেক্সট/URL",
+      "image": "ছবি",
+      "audio": "অডিও",
+      "video": "ভিডিও"
+    },
+    "uploadImage": "ছবি আপলোড করুন",
+    "uploadAudio": "অডিও ফাইল আপলোড করুন",
+    "uploadVideo": "ভিডিও আপলোড করুন",
+    "recordAudio": "অডিও রেকর্ড করুন",
+    "stopRecording": "রেকর্ডিং বন্ধ করুন",
+    "dragDrop": "টানুন এবং ছাড়ুন বা আপলোড করতে ক্লিক করুন",
+    "analyzing": "বিষয়বস্তু বিশ্লেষণ করা হচ্ছে...",
+    "signInRequired": "সাইন ইন প্রয়োজন",
+    "signInMessage": "দয়া করে বিষয়বস্তু যাচাই করতে এবং আপনার যাচাইকরণ ইতিহাস সংরক্ষণ করতে সাইন ইন করুন।"
+  },
+  "results": {
+    "verdict": {
+      "true": "সত্য",
+      "false": "মিথ্যা",
+      "misleading": "বিভ্রান্তিকর",
+      "unverified": "যাচাইকৃত নয়"
+    },
+    "confidenceScore": "আত্মবিশ্বাস স্কোর",
+    "explanation": "ব্যাখ্যা",
+    "sources": "উৎস",
+    "analyzedContent": "বিশ্লেষিত বিষয়বস্তু",
+    "redFlags": "সতর্কতা সংকেত",
+    "positiveIndicators": "ইতিবাচক সূচক",
+    "credibleSources": "বিশ্বাসযোগ্য উৎস"
+  },
+  "actions": {
+    "bookmark": "বুকমার্ক",
+    "bookmarked": "বুকমার্ক করা হয়েছে",
+    "share": "ফলাফল শেয়ার করুন",
+    "reportIssue": "সমস্যা রিপোর্ট করুন",
+    "viewDetails": "বিস্তারিত দেখুন"
+  },
+  "history": {
+    "title": "যাচাইকরণ ইতিহাস",
+    "subtitle": "আপনার সমস্ত অতীত যাচাইকরণ এবং তাদের ফলাফল ব্রাউজ করুন",
+    "allVerifications": "সমস্ত যাচাইকরণ",
+    "bookmarks": "বুকমার্ক",
+    "noResults": "কোন যাচাইকরণ পাওয়া যায়নি",
+    "noHistory": "এখনও কোন যাচাইকরণ ইতিহাস নেই",
+    "noBookmarks": "এখনও কোন বুকমার্ক করা যাচাইকরণ নেই",
+    "bookmarkHint": "পরে সংরক্ষণ করতে যাচাইকরণ বুকমার্ক করুন"
+  },
+  "feedback": {
+    "title": "মতামত",
+    "subject": "বিষয়",
+    "message": "বার্তা",
+    "submit": "মতামত জমা দিন",
+    "type": {
+      "bug": "বাগ রিপোর্ট",
+      "feature": "ফিচার অনুরোধ",
+      "general": "সাধারণ মতামত",
+      "accuracy": "নির্ভুলতা সমস্যা"
+    }
+  },
+  "settings": {
+    "title": "সেটিংস",
+    "theme": "থিম",
+    "light": "আলো",
+    "dark": "অন্ধকার",
+    "system": "সিস্টেম",
+    "notifications": "বিজ্ঞপ্তি",
+    "privacy": "গোপনীয়তা এবং নিরাপত্তা",
+    "saveHistory": "যাচাইকরণ ইতিহাস সংরক্ষণ করুন",
+    "anonymousMode": "বেনামী মোড"
+  },
+  "about": {
+    "title": "ট্রুথলেন্স সম্পর্কে",
+    "mission": "আমাদের লক্ষ্য",
+    "features": "বৈশিষ্ট্য",
+    "technology": "প্রযুক্তি",
+    "contact": "যোগাযোগ করুন"
+  },
+  "messages": {
+    "success": {
+      "verified": "বিষয়বস্তু সফলভাবে যাচাই করা হয়েছে",
+      "bookmarkAdded": "বুকমার্কে সংরক্ষিত",
+      "bookmarkRemoved": "বুকমার্ক সরানো হয়েছে",
+      "feedbackSubmitted": "মতামত সফলভাবে জমা দেওয়া হয়েছে",
+      "settingsSaved": "সেটিংস সফলভাবে সংরক্ষিত হয়েছে"
+    },
+    "error": {
+      "verificationFailed": "যাচাইকরণ ব্যর্থ হয়েছে",
+      "bookmarkFailed": "বুকমার্ক আপডেট করতে ব্যর্থ",
+      "networkError": "নেটওয়ার্ক ত্রুটি ঘটেছে",
+      "tryAgain": "দয়া করে আবার চেষ্টা করুন"
+    }
+  }
+}

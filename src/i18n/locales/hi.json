@@ -1,0 +1,144 @@
+{
+  "common": {
+    "appName": "ट्रुथलेंस",
+    "verify": "सत्यापित करें",
+    "verifying": "सत्यापित हो रहा है...",
+    "cancel": "रद्द करें",
+    "save": "सहेजें",
+    "delete": "हटाएं",
+    "edit": "संपादित करें",
+    "search": "खोजें",
+    "loading": "लोड हो रहा है...",
+    "language": "भाषा"
+  },
+  "nav": {
+    "dashboard": "डैशबोर्ड",
+    "history": "इतिहास",
+    "feedback": "प्रतिक्रिया",
+    "settings": "सेटिंग्स",
+    "about": "हमारे बारे में",
+    "production": "उत्पादन"
+  },
+  "auth": {
+    "signIn": "साइन इन करें",
+    "signUp": "साइन अप करें",
+    "signOut": "साइन आउट करें",
+    "email": "ईमेल",
+    "password": "पासवर्ड",
+    "confirmPassword": "पासवर्ड की पुष्टि करें",
+    "displayName": "प्रदर्शन नाम",
+    "forgotPassword": "पासवर्ड भूल गए?",
+    "noAccount": "खाता नहीं है?",
+    "hasAccount": "पहले से खाता है?",
+    "createAccount": "खाता बनाएं",
+    "welcome": "ट्रुथलेंस में आपका स्वागत है",
+    "subtitle": "AI-संचालित तथ्य-जांच के साथ सत्य की पुष्टि करें"
+  },
+  "dashboard": {
+    "title": "डैशबोर्ड",
+    "quickVerify": "त्वरित सत्यापन",
+    "recentVerifications": "हाल के सत्यापन",
+    "trendingNews": "ट्रेंडिंग समाचार",
+    "stats": {
+      "totalVerifications": "कुल सत्यापन",
+      "accuracy": "सटीकता दर",
+      "saved": "सहेजी गई वस्तुएं"
+    }
+  },
+  "verify": {
+    "inputPlaceholder": "सत्यापित करने के लिए टेक्स्ट, URL, या सामग्री दर्ज करें...",
+    "urlPlaceholder": "सत्यापित करने के लिए URL दर्ज करें...",
+    "tabs": {
+      "text": "टेक्स्ट/URL",
+      "image": "छवि",
+      "audio": "ऑडियो",
+      "video": "वीडियो"
+    },
+    "uploadImage": "छवि अपलोड करें",
+    "uploadAudio": "ऑडियो फ़ाइल अपलोड करें",
+    "uploadVideo": "वीडियो अपलोड करें",
+    "recordAudio": "ऑडियो रिकॉर्ड करें",
+    "stopRecording": "रिकॉर्डिंग बंद करें",
+    "dragDrop": "खींचें और छोड़ें या अपलोड करने के लिए क्लिक करें",
+    "analyzing": "सामग्री का विश्लेषण हो रहा है...",
+    "signInRequired": "साइन इन आवश्यक है",
+    "signInMessage": "कृपया सामग्री सत्यापित करने और अपना सत्यापन इतिहास सहेजने के लिए साइन इन करें।"
+  },
+  "results": {
+    "verdict": {
+      "true": "सत्य",
+      "false": "असत्य",
+      "misleading": "भ्रामक",
+      "unverified": "असत्यापित"
+    },
+    "confidenceScore": "विश्वास स्कोर",
+    "explanation": "व्याख्या",
+    "sources": "स्रोत",
+    "analyzedContent": "विश्लेषित सामग्री",
+    "redFlags": "चेतावनी संकेत",
+    "positiveIndicators": "सकारात्मक संकेतक",
+    "credibleSources": "विश्वसनीय स्रोत"
+  },
+  "actions": {
+    "bookmark": "बुकमार्क करें",
+    "bookmarked": "बुकमार्क किया गया",
+    "share": "परिणाम साझा करें",
+    "reportIssue": "समस्या की रिपोर्ट करें",
+    "viewDetails": "विवरण देखें"
+  },
+  "history": {
+    "title": "सत्यापन इतिहास",
+    "subtitle": "अपने सभी पिछले सत्यापन और उनके परिणाम देखें",
+    "allVerifications": "सभी सत्यापन",
+    "bookmarks": "बुकमार्क",
+    "noResults": "कोई सत्यापन नहीं मिला",
+    "noHistory": "अभी तक कोई सत्यापन इतिहास नहीं है",
+    "noBookmarks": "अभी तक कोई बुकमार्क किए गए सत्यापन नहीं हैं",
+    "bookmarkHint": "बाद में सहेजने के लिए सत्यापन को बुकमार्क करें"
+  },
+  "feedback": {
+    "title": "प्रतिक्रिया",
+    "subject": "विषय",
+    "message": "संदेश",
+    "submit": "प्रतिक्रिया सबमिट करें",
+    "type": {
+      "bug": "बग रिपोर्ट",
+      "feature": "फीचर अनुरोध",
+      "general": "सामान्य प्रतिक्रिया",
+      "accuracy": "सटीकता मुद्दा"
+    }
+  },
+  "settings": {
+    "title": "सेटिंग्स",
+    "theme": "थीम",
+    "light": "लाइट",
+    "dark": "डार्क",
+    "system": "सिस्टम",
+    "notifications": "सूचनाएं",
+    "privacy": "गोपनीयता और सुरक्षा",
+    "saveHistory": "सत्यापन इतिहास सहेजें",
+    "anonymousMode": "गुमनाम मोड"
+  },
+  "about": {
+    "title": "ट्रुथलेंस के बारे में",
+    "mission": "हमारा मिशन",
+    "features": "विशेषताएं",
+    "technology": "प्रौद्योगिकी",
+    "contact": "संपर्क करें"
+  },
+  "messages": {
+    "success": {
+      "verified": "सामग्री सफलतापूर्वक सत्यापित की गई",
+      "bookmarkAdded": "बुकमार्क में सहेजा गया",
+      "bookmarkRemoved": "बुकमार्क हटाया गया",
+      "feedbackSubmitted": "प्रतिक्रिया सफलतापूर्वक सबमिट की गई",
+      "settingsSaved": "सेटिंग्स सफलतापूर्वक सहेजी गईं"
+    },
+    "error": {
+      "verificationFailed": "सत्यापन विफल रहा",
+      "bookmarkFailed": "बुकमार्क अपडेट करने में विफल",
+      "networkError": "नेटवर्क त्रुटि हुई",
+      "tryAgain": "कृपया पुनः प्रयास करें"
+    }
+  }
+}

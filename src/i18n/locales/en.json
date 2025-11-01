@@ -1,0 +1,144 @@
+{
+  "common": {
+    "appName": "TruthLens",
+    "verify": "Verify",
+    "verifying": "Verifying...",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "search": "Search",
+    "loading": "Loading...",
+    "language": "Language"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "history": "History",
+    "feedback": "Feedback",
+    "settings": "Settings",
+    "about": "About",
+    "production": "Production"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "displayName": "Display Name",
+    "forgotPassword": "Forgot Password?",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "createAccount": "Create Account",
+    "welcome": "Welcome to TruthLens",
+    "subtitle": "Verify the truth with AI-powered fact-checking"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "quickVerify": "Quick Verify",
+    "recentVerifications": "Recent Verifications",
+    "trendingNews": "Trending News",
+    "stats": {
+      "totalVerifications": "Total Verifications",
+      "accuracy": "Accuracy Rate",
+      "saved": "Saved Items"
+    }
+  },
+  "verify": {
+    "inputPlaceholder": "Enter text, URL, or paste content to verify...",
+    "urlPlaceholder": "Enter URL to verify...",
+    "tabs": {
+      "text": "Text/URL",
+      "image": "Image",
+      "audio": "Audio",
+      "video": "Video"
+    },
+    "uploadImage": "Upload Image",
+    "uploadAudio": "Upload Audio File",
+    "uploadVideo": "Upload Video",
+    "recordAudio": "Record Audio",
+    "stopRecording": "Stop Recording",
+    "dragDrop": "Drag & drop or click to upload",
+    "analyzing": "Analyzing content...",
+    "signInRequired": "Sign in required",
+    "signInMessage": "Please sign in to verify content and save your verification history."
+  },
+  "results": {
+    "verdict": {
+      "true": "TRUE",
+      "false": "FALSE",
+      "misleading": "MISLEADING",
+      "unverified": "UNVERIFIED"
+    },
+    "confidenceScore": "Confidence Score",
+    "explanation": "Explanation",
+    "sources": "Sources",
+    "analyzedContent": "Analyzed Content",
+    "redFlags": "Red Flags",
+    "positiveIndicators": "Positive Indicators",
+    "credibleSources": "Credible Sources"
+  },
+  "actions": {
+    "bookmark": "Bookmark",
+    "bookmarked": "Bookmarked",
+    "share": "Share Result",
+    "reportIssue": "Report Issue",
+    "viewDetails": "View Details"
+  },
+  "history": {
+    "title": "Verification History",
+    "subtitle": "Browse all your past verifications and their results",
+    "allVerifications": "All Verifications",
+    "bookmarks": "Bookmarks",
+    "noResults": "No verifications found",
+    "noHistory": "No verification history yet",
+    "noBookmarks": "No bookmarked verifications yet",
+    "bookmarkHint": "Bookmark verifications to save them for later"
+  },
+  "feedback": {
+    "title": "Feedback",
+    "subject": "Subject",
+    "message": "Message",
+    "submit": "Submit Feedback",
+    "type": {
+      "bug": "Bug Report",
+      "feature": "Feature Request",
+      "general": "General Feedback",
+      "accuracy": "Accuracy Issue"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "theme": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "notifications": "Notifications",
+    "privacy": "Privacy & Security",
+    "saveHistory": "Save Verification History",
+    "anonymousMode": "Anonymous Mode"
+  },
+  "about": {
+    "title": "About TruthLens",
+    "mission": "Our Mission",
+    "features": "Features",
+    "technology": "Technology",
+    "contact": "Get in Touch"
+  },
+  "messages": {
+    "success": {
+      "verified": "Content verified successfully",
+      "bookmarkAdded": "Saved to bookmarks",
+      "bookmarkRemoved": "Bookmark removed",
+      "feedbackSubmitted": "Feedback submitted successfully",
+      "settingsSaved": "Settings saved successfully"
+    },
+    "error": {
+      "verificationFailed": "Verification failed",
+      "bookmarkFailed": "Failed to update bookmark",
+      "networkError": "Network error occurred",
+      "tryAgain": "Please try again"
+    }
+  }
+}
