@@ -9,9 +9,10 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, XCircle, AlertCircle, HelpCircle, Shield, MessageSquare, Share2 } from "lucide-react";
+import { CheckCircle, XCircle, AlertCircle, HelpCircle, Shield, MessageSquare, Share2, Bookmark, BookmarkCheck } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { FeedbackDialog } from "@/components/FeedbackDialog";
+import { supabase } from "@/integrations/supabase/client";
 
 interface VerificationDialogProps {
   open: boolean;
@@ -26,18 +27,44 @@ interface VerificationDialogProps {
     sources: any;
     ai_analysis: any;
     created_at: string;
+    is_bookmarked?: boolean;
   } | null;
+  onBookmarkChange?: () => void;
 }
 
 export function VerificationDialog({
   open,
   onOpenChange,
   verification,
+  onBookmarkChange,
 }: VerificationDialogProps) {
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [shareMenuOpen, setShareMenuOpen] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(verification?.is_bookmarked || false);
+  const [isTogglingBookmark, setIsTogglingBookmark] = useState(false);
   
   if (!verification) return null;
+
+  const toggleBookmark = async () => {
+    setIsTogglingBookmark(true);
+    try {
+      const { error } = await supabase
+        .from("verifications")
+        .update({ is_bookmarked: !isBookmarked })
+        .eq("id", verification.id);
+
+      if (error) throw error;
+
+      setIsBookmarked(!isBookmarked);
+      toast.success(isBookmarked ? "Bookmark removed" : "Saved to bookmarks");
+      onBookmarkChange?.();
+    } catch (error) {
+      console.error("Error toggling bookmark:", error);
+      toast.error("Failed to update bookmark");
+    } finally {
+      setIsTogglingBookmark(false);
+    }
+  };
 
   const generateShareText = () => {
     const verdict = verification.verdict.toUpperCase();
@@ -240,6 +267,32 @@ export function VerificationDialog({
 
           {/* Action Buttons */}
           <div className="pt-6 border-t space-y-3">
+            {/* Bookmark and Feedback Buttons */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button
+                onClick={toggleBookmark}
+                variant="outline"
+                className="flex-1"
+                disabled={isTogglingBookmark}
+              >
+                {isBookmarked ? (
+                  <BookmarkCheck className="h-4 w-4 mr-2" />
+                ) : (
+                  <Bookmark className="h-4 w-4 mr-2" />
+                )}
+                {isBookmarked ? "Bookmarked" : "Bookmark"}
+              </Button>
+              
+              <Button
+                onClick={() => setFeedbackOpen(true)}
+                variant="outline"
+                className="flex-1"
+              >
+                <MessageSquare className="h-4 w-4 mr-2" />
+                Report Issue
+              </Button>
+            </div>
+            
             {/* Share Button */}
             <div className="space-y-2">
               <Button 

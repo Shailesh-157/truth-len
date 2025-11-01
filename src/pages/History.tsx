@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { CheckCircle, XCircle, AlertCircle, HelpCircle, Search, Loader2 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CheckCircle, XCircle, AlertCircle, HelpCircle, Search, Loader2, Bookmark } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDistanceToNow } from "date-fns";
 import { VerificationDialog } from "@/components/VerificationDialog";
@@ -19,6 +20,7 @@ interface Verification {
   sources: any;
   ai_analysis: any;
   created_at: string;
+  is_bookmarked?: boolean;
 }
 
 const History = () => {
@@ -96,32 +98,43 @@ const History = () => {
           </p>
         </div>
 
-        {/* Search */}
-        <div className="relative max-w-md w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search verifications..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 w-full"
-          />
-        </div>
-
-        {/* Results */}
-        {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        {/* Tabs for All/Bookmarks */}
+        <Tabs defaultValue="all" className="w-full">
+          <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center mb-4">
+            <TabsList>
+              <TabsTrigger value="all">All Verifications</TabsTrigger>
+              <TabsTrigger value="bookmarks" className="gap-2">
+                <Bookmark className="h-4 w-4" />
+                Bookmarks
+              </TabsTrigger>
+            </TabsList>
+            
+            <div className="relative max-w-md w-full">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search verifications..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 w-full"
+              />
+            </div>
           </div>
-        ) : filteredVerifications.length === 0 ? (
-          <Card className="w-full">
-            <CardContent className="py-12 text-center">
-              <p className="text-sm sm:text-base text-muted-foreground">
-                {searchQuery ? "No verifications found" : "No verification history yet"}
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid gap-3 sm:gap-4 w-full">
+
+          <TabsContent value="all">
+            {isLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : filteredVerifications.length === 0 ? (
+              <Card className="w-full">
+                <CardContent className="py-12 text-center">
+                  <p className="text-sm sm:text-base text-muted-foreground">
+                    {searchQuery ? "No verifications found" : "No verification history yet"}
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-3 sm:gap-4 w-full">
             {filteredVerifications.map((item) => (
               <Card
                 key={item.id}
@@ -153,8 +166,64 @@ const History = () => {
                 </CardHeader>
               </Card>
             ))}
-          </div>
-        )}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="bookmarks">
+            {isLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : filteredVerifications.filter(v => v.is_bookmarked).length === 0 ? (
+              <Card className="w-full">
+                <CardContent className="py-12 text-center">
+                  <Bookmark className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                  <p className="text-sm sm:text-base text-muted-foreground">
+                    No bookmarked verifications yet
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Bookmark verifications to save them for later
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-3 sm:gap-4 w-full">
+                {filteredVerifications.filter(v => v.is_bookmarked).map((item) => (
+                  <Card
+                    key={item.id}
+                    className="border-2 hover:shadow-lg transition-all cursor-pointer w-full max-w-full overflow-hidden"
+                    onClick={() => setSelectedVerification(item)}
+                  >
+                    <CardHeader className="p-3 sm:p-4 md:p-6 w-full">
+                      <div className="flex items-start gap-2 sm:gap-3 w-full min-w-0">
+                        <div className="mt-1 flex-shrink-0">{getIcon(item.verdict)}</div>
+                        <div className="flex-1 min-w-0 overflow-hidden w-full max-w-full">
+                          <CardTitle className="text-sm sm:text-base md:text-lg break-words overflow-wrap-anywhere pr-2">
+                            {item.content_text || item.content_url || "Verification"}
+                          </CardTitle>
+                          <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-1.5 sm:gap-2 mt-2 w-full">
+                            <Badge variant={getBadgeVariant(item.verdict)} className="text-xs flex-shrink-0 whitespace-nowrap">
+                              {item.verdict.toUpperCase()}
+                            </Badge>
+                            <Badge variant="outline" className="text-xs flex-shrink-0 whitespace-nowrap">
+                              {item.confidence_score}% confident
+                            </Badge>
+                            <span className="text-xs sm:text-sm text-muted-foreground break-words">
+                              {formatDistanceToNow(new Date(item.created_at), {
+                                addSuffix: true,
+                              })}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </CardHeader>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
           </div>
         </div>
 
@@ -162,6 +231,7 @@ const History = () => {
           open={!!selectedVerification}
           onOpenChange={(open) => !open && setSelectedVerification(null)}
           verification={selectedVerification}
+          onBookmarkChange={loadVerifications}
         />
       </div>
     </div>

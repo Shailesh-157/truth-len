@@ -16,6 +16,7 @@ interface Verification {
   sources: any;
   ai_analysis: any;
   created_at: string;
+  is_bookmarked?: boolean;
 }
 
 export function RecentVerifications() {
@@ -107,6 +108,7 @@ export function RecentVerifications() {
         open={!!selectedVerification}
         onOpenChange={(open) => !open && setSelectedVerification(null)}
         verification={selectedVerification}
+        onBookmarkChange={loadVerifications}
       />
     </Card>
   );

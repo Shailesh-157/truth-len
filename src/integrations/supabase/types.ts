@@ -161,6 +161,7 @@ export type Database = {
           created_at: string | null
           explanation: string | null
           id: string
+          is_bookmarked: boolean | null
           is_trending: boolean | null
           sources: Json | null
           user_id: string | null
@@ -177,6 +178,7 @@ export type Database = {
           created_at?: string | null
           explanation?: string | null
           id?: string
+          is_bookmarked?: boolean | null
           is_trending?: boolean | null
           sources?: Json | null
           user_id?: string | null
@@ -193,6 +195,7 @@ export type Database = {
           created_at?: string | null
           explanation?: string | null
           id?: string
+          is_bookmarked?: boolean | null
           is_trending?: boolean | null
           sources?: Json | null
           user_id?: string | null
